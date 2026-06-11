@@ -1,0 +1,21 @@
+replicaCount: 5
+
+ingress:
+  hosts:
+    - host: api.portfolio.example.com
+  tls:
+    - secretName: portfolio-app-tls
+      hosts:
+        - api.portfolio.example.com
+
+autoscaling:
+  minReplicas: 5
+  maxReplicas: 20
+
+resources:
+  limits:
+    cpu: 1
+    memory: 2Gi
+  requests:
+    cpu: 512m
+    memory: 1Gi

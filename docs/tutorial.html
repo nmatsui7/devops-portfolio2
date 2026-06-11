@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps Portfolio Tutorial - Volume 2</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    display: flex;
+  }
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    z-index: 100;
+  }
+  nav h1 {
+    font-size: 16px;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  nav a {
+    display: block;
+    padding: 6px 12px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: 6px;
+    margin-bottom: 2px;
+    transition: all 0.15s;
+  }
+  nav a:hover, nav a.active {
+    color: var(--text);
+    background: var(--bg3);
+  }
+  nav a.active { color: var(--accent); font-weight: 600; }
+  nav a.h2 { padding-left: 24px; font-size: 12px; }
+  main {
+    margin-left: 280px;
+    max-width: 900px;
+    padding: 48px 64px 120px;
+  }
+  h2 {
+    font-size: 28px;
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--accent);
+  }
+  h2:first-of-type { margin-top: 0; }
+  h3 {
+    font-size: 20px;
+    margin: 32px 0 12px;
+    color: var(--text);
+  }
+  p, li { color: var(--text2); margin-bottom: 12px; font-size: 15px; }
+  ul, ol { padding-left: 24px; margin-bottom: 16px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); }
+  code {
+    background: var(--bg3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    color: var(--purple);
+  }
+  pre {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    position: relative;
+  }
+  pre .label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 0 8px 0 8px;
+    text-transform: uppercase;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: left;
+  }
+  th {
+    background: var(--bg3);
+    color: var(--text);
+    font-weight: 600;
+  }
+  td { color: var(--text2); }
+  .info, .tip, .warn {
+    border-left: 4px solid;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    background: var(--bg3);
+  }
+  .info { border-color: var(--accent); }
+  .tip  { border-color: var(--green); }
+  .warn { border-color: var(--yellow); }
+  .info strong { color: var(--accent); }
+  .tip strong { color: var(--green); }
+  .warn strong { color: var(--yellow); }
+  .step-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    counter-increment: step;
+  }
+  .step-box::before {
+    content: "Step " counter(step);
+    display: block;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .glossary-term {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  @media (max-width: 768px) {
+    nav { display: none; }
+    main { margin-left: 0; padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <h1>DevOps Volume 2</h1>
+  <a href="#intro">Introduction</a>
+  <a href="#who" class="h2">Who This Is For</a>
+  <a href="#prereqs" class="h2">Prerequisites</a>
+  <a href="#workflow" class="h2">Exercise Workflow</a>
+  <a href="#flask-app">1. Write the Flask API</a>
+  <a href="#exercise-config" class="h2">config.py</a>
+  <a href="#exercise-models" class="h2">models.py</a>
+  <a href="#verify" class="h2">Verify with Tests</a>
+  <a href="#exercise-app" class="h2">app.py</a>
+  <a href="#exercise-migrations" class="h2">migrations.py</a>
+  <a href="#docker">2. Docker &amp; Compose</a>
+  <a href="#db-migrations" class="h2">Database Migrations</a>
+  <a href="#helm">3. Helm Packaging</a>
+  <a href="#helm-why" class="h2">Why Helm?</a>
+  <a href="#helm-structure" class="h2">Chart Structure</a>
+  <a href="#gitops-argocd">4. GitOps with ArgoCD</a>
+  <a href="#argocd-install" class="h2">Installing ArgoCD</a>
+  <a href="#argocd-apps" class="h2">Application Definitions</a>
+  <a href="#ci-cd">5. Enhanced CI/CD</a>
+  <a href="#ci-tests" class="h2">Integration Tests</a>
+  <a href="#ci-scan" class="h2">Security Scanning</a>
+  <a href="#cd-helm" class="h2">Helm Deploy</a>
+  <a href="#observability">6. Observability Stack</a>
+  <a href="#loki" class="h2">Loki: Log Aggregation</a>
+  <a href="#tempo" class="h2">Tempo: Distributed Tracing</a>
+  <a href="#custom-metrics" class="h2">Custom App Metrics</a>
+  <a href="#alertmanager" class="h2">Alertmanager</a>
+  <a href="#security">7. Security</a>
+  <a href="#network-policies" class="h2">Network Policies</a>
+  <a href="#trivy" class="h2">Trivy Scanning</a>
+  <a href="#synthetic-monitoring">8. Synthetic Monitoring</a>
+  <a href="#local-lab">9. Local Lab Walkthrough</a>
+  <a href="#ansible-ssh">10. Ansible over SSH</a>
+  <a href="#glossary">Glossary</a>
+  <a href="#next-steps">Next Steps</a>
+</nav>
+
+<main>
+
+<h2 id="intro">Introduction</h2>
+
+<div class="warn">
+  <strong>This is Volume 2.</strong> It assumes you have completed <a href="https://github.com/yourorg/devops-portfolio">Volume 1</a> or already know Docker, Docker Compose, Kubernetes basics (Deployments, Services, Ingress), Terraform, GitHub Actions, Prometheus/Grafana, and Ansible. If any of those terms are unfamiliar, start with Volume 1 first.
+</div>
+
+<p>
+  Welcome to the sequel. Where Volume 1 taught you to crawl and walk with Docker, basic Kubernetes, and a static Nginx app, Volume 2 asks you to run.
+</p>
+
+<p>
+  In this tutorial you will replace the static site with a real Python API backed by PostgreSQL, package your Kubernetes manifests into a reusable Helm chart, manage deployments with ArgoCD GitOps, harden your pipeline with integration tests and Trivy security scanning, and build a complete observability stack with logs (Loki), traces (Tempo), and custom application metrics.
+</p>
+
+<p>
+  Each chapter builds on the last. By the end you will have a production-oriented portfolio project that shows real DevOps engineering judgment.
+</p>
+
+<div class="info">
+  <strong>New in Volume 2:</strong> Flask API, PostgreSQL, Alembic migrations, Helm, ArgoCD, Loki, Tempo, custom Prometheus metrics, Alertmanager, Trivy, Network Policies, synthetic monitoring with K6.
+</div>
+
+<h3 id="who">Who This Is For</h3>
+
+<p>
+  You should have completed Volume 1 or already understand:
+</p>
+<ul>
+  <li>Docker and Docker Compose (building images, multi-service stacks, volumes, networks)</li>
+  <li>Kubernetes basics (Pods, Deployments, Services, HPAs, Ingress)</li>
+  <li>Terraform fundamentals (providers, resources, modules, state)</li>
+  <li>GitHub Actions (workflow syntax, jobs, steps, secrets)</li>
+  <li>Prometheus and Grafana at a basic level</li>
+  <li>Ansible concepts (playbooks, roles, tasks)</li>
+</ul>
+
+<h3 id="prereqs">Prerequisites</h3>
+
+<p>All the tools from Volume 1, plus a few additions:</p>
+
+<table>
+  <tr><th>Tool</th><th>Minimum Version</th><th>Purpose</th></tr>
+  <tr><td>Docker Desktop</td><td>24+</td><td>Containers and Compose</td></tr>
+  <tr><td>kubectl</td><td>1.29+</td><td>Kubernetes CLI</td></tr>
+  <tr><td>helm</td><td>3.14+</td><td>Kubernetes package manager</td></tr>
+  <tr><td>argocd</td><td>2.10+</td><td>GitOps CLI (optional)</td></tr>
+  <tr><td>Python</td><td>3.12+</td><td>Flask API runtime</td></tr>
+  <tr><td>curl</td><td>any</td><td>Smoke tests</td></tr>
+</table>
+
+<div class="tip">
+  <strong>Quick install by OS:</strong>
+  <pre><code># macOS (Homebrew)
+brew install helm argocd python curl
+
+# Ubuntu / Debian (apt)
+sudo apt update && sudo apt install -y helm curl python3 python3-pip
+# ArgoCD CLI:
+curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd /usr/local/bin/argocd && rm argocd
+
+# Windows (winget)
+winget install Helm.Helm Python.Python.3.12 curl
+# ArgoCD CLI:
+curl -sSL -o argocd.exe https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe</code></pre>
+</div>
+
+<h3 id="workflow">Exercise Workflow</h3>
+
+<p>
+  Unlike Volume 1 where all code was provided, Volume 2 requires you to <strong>write the Python API yourself</strong>. The project is split into two directories:
+</p>
+
+<table>
+  <tr><th>Directory</th><th>Purpose</th></tr>
+  <tr><td><code>app/</code></td><td>Your workspace. Contains stub files with <code>TODO</code> markers. You fill in the code.</td></tr>
+  <tr><td><code>solutions/app/</code></td><td>The complete reference implementation. Check your answers here.</td></tr>
+</table>
+
+<div class="step-box">
+  <strong>Attempt each exercise</strong> — write your code in the <code>app/</code> files, then run the tests:
+  <pre><code>pip install -r app/requirements.txt
+pytest app/tests/ --cov=app --cov-report=term</code></pre>
+</div>
+
+<div class="step-box">
+  <strong>Run the solution stack</strong> when you want to see the app working end-to-end:
+  <pre><code>docker compose -f docker/docker-compose.yml -f docker/docker-compose.solution.yml up --build</code></pre>
+</div>
+
+<div class="step-box">
+  <strong>Reveal the answers</strong> when you are stuck:
+  <pre><code>bash scripts/reveal_solutions.sh</code></pre>
+</div>
+
+<div class="step-box">
+  <strong>Reset back to stubs</strong> to try again:
+  <pre><code>bash scripts/reset_exercises.sh</code></pre>
+</div>
+
+<h2 id="flask-app">1. Write the Flask API</h2>
+
+<p>
+  The static Nginx site from Volume 1 is replaced with a Python Flask API that connects to PostgreSQL. The app exposes a Todo list CRUD API plus health, readiness, metrics, and documentation endpoints.
+</p>
+
+<p>
+  You will write four files in <code>app/</code>. The tests in <code>app/tests/</code> define the contract. By the end of this chapter, <code>pytest app/tests/</code> should print green <code>PASSED</code> for every test.
+</p>
+
+<div class="info">
+  <strong>One step at a time.</strong> Each subsection below tells you exactly which lines to add. Type them into the file, save, and verify before moving to the next step.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1a: config.py -->
+<!-- ============================================================ -->
+
+<h3 id="exercise-config">1a. config.py — Application Configuration</h3>
+
+<p>
+  This file is provided complete. It reads settings from environment variables so the same code works in Docker Compose locally and in Kubernetes on EKS.
+</p>
+
+<p>Open <code>app/config.py</code>. It should already contain:</p>
+
+<pre><code class="label">app/config.py — complete</code>import os
+
+class Config:
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "postgresql://portfolio:portfolio@localhost:5432/portfolio"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "portfolio-app")
+    OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv(
+        "OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4318"
+    )</pre>
+
+<p>What each line does:</p>
+<table>
+  <tr><th>Line</th><th>Purpose</th></tr>
+  <tr><td><code>import os</code></td><td>Python standard library — gives us <code>os.getenv()</code> to read environment variables</td></tr>
+  <tr><td><code>class Config:</code></td><td>A plain class that holds all config as class attributes. Flask loads it via <code>app.config.from_object(Config)</code></td></tr>
+  <tr><td><code>SQLALCHEMY_DATABASE_URI</code></td><td>PostgreSQL connection string. Falls back to the local Docker Compose defaults</td></tr>
+  <tr><td><code>OTEL_EXPORTER_OTLP_ENDPOINT</code></td><td>Where to send OpenTelemetry traces. Falls back to <code>http://tempo:4318</code> for the local stack</td></tr>
+</table>
+
+<div class="tip">
+  <strong>No changes needed here.</strong> Close the file and move to 1b.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1b: models.py -->
+<!-- ============================================================ -->
+
+<h3 id="exercise-models">1b. models.py — The Todo Database Model</h3>
+
+<p>
+  This file defines what a "todo" looks like in the database. SQLAlchemy translates the Python class into a PostgreSQL table.
+</p>
+
+<p>Open <code>app/models.py</code>. You will see:</p>
+
+<pre><code class="label">app/models.py — before your edit</code>from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timezone
+
+db = SQLAlchemy()
+
+# TODO: Define the Todo model ...</pre>
+
+<div class="step-box">
+  <strong>Step 1:</strong> Delete the TODO comment block (everything from <code># TODO</code> to the end of the file). Replace it with a class definition. Type this exactly:
+  <pre><code>class Todo(db.Model):
+    __tablename__ = "todos"</code></pre>
+  <p><code>db.Model</code> is SQLAlchemy's base class — every table model inherits from it. <code>__tablename__</code> sets the database table name to <code>"todos"</code>. The tests look for this exact name.</p>
+</div>
+
+<div class="step-box">
+  <strong>Step 2:</strong> Add the <code>id</code> column. Indented inside the class, type:
+  <pre><code>    id = db.Column(db.Integer, primary_key=True)</code></pre>
+  <p><code>db.Column</code> defines a column. <code>db.Integer</code> is the type. <code>primary_key=True</code> makes it the auto-incrementing primary key. Every SQLAlchemy model needs at least one primary key column.</p>
+</div>
+
+<div class="step-box">
+  <strong>Step 3:</strong> Add the <code>title</code> column:
+  <pre><code>    title = db.Column(db.String(200), nullable=False)</code></pre>
+  <p><code>db.String(200)</code> maps to PostgreSQL's <code>VARCHAR(200)</code>. <code>nullable=False</code> means every todo must have a title — the database enforces this.</p>
+</div>
+
+<div class="step-box">
+  <strong>Step 4:</strong> Add the <code>completed</code> column:
+  <pre><code>    completed = db.Column(db.Boolean, default=False)</code></pre>
+  <p><code>db.Boolean</code> maps to PostgreSQL's <code>BOOLEAN</code>. <code>default=False</code> means new todos start as not-completed. Notice this is a Python default, not a database-level DEFAULT.</p>
+</div>
+
+<div class="step-box">
+  <strong>Step 5:</strong> Add the <code>created_at</code> timestamp:
+  <pre><code>    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))</code></pre>
+  <p><code>db.DateTime</code> maps to <code>TIMESTAMP WITH TIME ZONE</code>. The <code>default</code> calls a function that returns the current UTC time. The <code>lambda</code> is important — it makes Python call <code>datetime.now()</code> fresh each time a new row is created, instead of evaluating it once when the class is loaded.</p>
+</div>
+
+<div class="step-box">
+  <strong>Step 6:</strong> Add the <code>updated_at</code> timestamp:
+  <pre><code>    updated_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )</code></pre>
+  <p><code>onupdate</code> fires every time the row is updated. This lets you track when a todo was last modified without writing manual timestamp code in every route handler.</p>
+</div>
+
+<div class="step-box">
+  <strong>Step 7:</strong> Add the <code>to_dict()</code> method. Indented at the same level as the columns, type:
+  <pre><code>    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "completed": self.completed,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }</code></pre>
+  <p>This serializes the model into a Python dictionary. The <code>.isoformat()</code> calls convert the datetime objects into strings like <code>"2026-06-09T12:00:00+00:00"</code>. The tests call <code>.to_dict()</code> on every response.</p>
+</div>
+
+<div class="info">
+  <strong>OOP concepts in this class:</strong>
+
+  <p><strong><code>class Todo(db.Model):</code></strong> — defines a new <em>class</em>, like a blueprint. The <code>db.Model</code> in parentheses means <em>inheritance</em>: Todo gets all the behavior of SQLAlchemy's Model class (saving, querying, deleting) and adds its own columns and methods.</p>
+
+  <p><strong><code>__tablename__ = "todos"</code></strong> — a <em>class variable</em>. It belongs to the class itself, not to any particular instance. Every instance of Todo points to the same <code>"todos"</code> table. SQLAlchemy reads this at import time to know which database table to use.</p>
+
+  <p><strong><code>def to_dict(self):</code></strong> — an <em>instance method</em>. The <code>self</code> parameter is how a method refers to the specific instance that called it. When you write <code>todo.to_dict()</code>, Python automatically passes the <code>todo</code> instance as <code>self</code>. You never pass <code>self</code> yourself — Python fills it in. Without <code>self</code>, methods cannot access the instance's data.</p>
+
+  <p><strong>Why no <code>__init__</code>?</strong> — Most Python classes have an <code>__init__</code> method (<code>def __init__(self, title):</code>) that sets attributes on <code>self</code>. SQLAlchemy models skip this because SQLAlchemy creates instances internally from database rows using its own initialization logic. The columns defined at the class level (<code>id</code>, <code>title</code>, etc.) are special SQLAlchemy descriptors — they look like class variables but act as instance attributes at runtime.</p>
+
+  <p><strong>underscore naming:</strong> — <code>__tablename__</code> is a <em>dunder</em> (double underscore) attribute. Python reserves names like <code>__xxx__</code> for special purposes. SQLAlchemy looks for <code>__tablename__</code> specifically to determine the database table name. Other tools like <code>to_dict()</code> use regular names because they are your own application methods.</p>
+</div>
+
+<div class="warn">
+  <strong>Indentation matters.</strong> All columns and methods must be indented exactly 4 spaces inside the class. Python will raise <code>IndentationError</code> if the spacing is wrong. If you see that error, check your editor shows spaces, not tabs.
+</div>
+
+<p>Your complete <code>app/models.py</code> should now look like:</p>
+
+<pre><code class="label">app/models.py — after your edit</code>from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timezone
+
+db = SQLAlchemy()
+
+
+class Todo(db.Model):
+    __tablename__ = "todos"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(
+        db.DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "completed": self.completed,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }</pre>
+
+<!-- ============================================================ -->
+<!-- 1c: verify -->
+<!-- ============================================================ -->
+
+<h3 id="verify">1c. Verify with Tests</h3>
+
+<p>
+  You just wrote a database model — the first piece of real code in this project. Now run the test suite to see how it works. The tests use an in-memory SQLite database, so no PostgreSQL or Docker is needed.
+</p>
+<p>
+  At this point, most tests will <strong>fail</strong> because the route handlers are still stubs. That is expected. The goal of running now is to confirm that the test runner works, the imports load, and the model is connected correctly. The passing count will grow as you write the routes in the next section.
+</p>
+
+<div class="step-box">
+  <strong>Step 1:</strong> Create and activate a Python virtual environment:
+  <pre><code>python3 -m venv .venv
+source .venv/bin/activate</code></pre>
+  <p>
+    A <strong>virtual environment</strong> is an isolated folder (<code>.venv/</code>) that holds Python packages for this project only. It prevents conflicts between projects that need different versions of the same library. The <code>source .venv/bin/activate</code> command tells your terminal to use this environment's Python instead of the system one. After activation, you use <code>python</code> and <code>pip</code> (not <code>python3</code> and <code>pip3</code>).
+  </p>
+  <p>
+    On Windows, activate with <code>.venv\Scripts\activate</code> instead.
+  </p>
+  <p>
+    When you close your terminal later, reactivate with the same <code>source .venv/bin/activate</code> command before working on this project.
+  </p>
+</div>
+
+<div class="step-box">
+  <strong>Step 2:</strong> Install the Python dependencies:
+  <pre><code>pip install -r app/requirements.txt</code></pre>
+  <p>This installs Flask, SQLAlchemy, Prometheus client, OpenTelemetry SDK, pytest, and the other dependencies listed in <code>requirements.txt</code> into your <code>.venv</code>.</p>
+</div>
+
+<div class="step-box">
+  <strong>Step 3:</strong> Run the tests with verbose output:
+  <pre><code>pytest app/tests/ --cov=app --cov-report=term -v</code></pre>
+  <p>The <code>-v</code> flag prints each test name and its result. <code>--cov=app</code> measures code coverage of the <code>app/</code> directory. <code>--cov-report=term</code> prints the coverage summary to the terminal.</p>
+</div>
+
+<p>When all routes are written, all 10 tests pass and you will see:</p>
+
+<pre><code class="label">expected output</code>============================= test session starts ==============================
+collected 10 items
+
+app/tests/test_api.py::test_health PASSED
+app/tests/test_api.py::test_ready PASSED
+app/tests/test_api.py::test_metrics PASSED
+app/tests/test_api.py::test_list_todos_empty PASSED
+app/tests/test_api.py::test_create_todo PASSED
+app/tests/test_api.py::test_create_todo_no_title PASSED
+app/tests/test_api.py::test_get_todo PASSED
+app/tests/test_api.py::test_get_todo_not_found PASSED
+app/tests/test_api.py::test_update_todo PASSED
+app/tests/test_api.py::test_delete_todo PASSED
+
+---------- coverage: platform darwin, python 3.12.4 ----------
+Name       Stmts   Miss  Cover
+------------------------------
+app.py       ---    ---   ~87%
+------------------------------
+TOTAL        ---    ---   ~87%
+
+========================== 10 passed in 0.45s ==========================</code></pre>
+
+<div class="tip">
+  <strong>10 tests, not 9.</strong> The test count increased from Volume 1. We added one test — <code>test_list_todos_empty</code> — which verifies the initial state returns an empty list. This helps catch cases where the database setup is wrong.
+</div>
+
+<h4>Debugging Test Failures</h4>
+
+<table>
+  <tr><th>If you see... </th><th>Check... </th></tr>
+  <tr><td><code>ImportError: cannot import name 'Counter'</code></td><td>Did you add the <code>from prometheus_client import ...</code> line at the top of <code>app.py</code>?</td></tr>
+  <tr><td><code>AttributeError: module 'app' has no attribute 'app'</code></td><td>The <code>conftest.py</code> does <code>from app import app as flask_app</code>. It expects your file to be named <code>app.py</code> and to define a variable named <code>app</code>. Make sure you did not rename the file or the variable.</td></tr>
+  <tr><td><code>NameError: name 'Todo' is not defined</code></td><td>Check that you imported <code>Todo</code> in <code>app.py</code> (<code>from models import db, Todo</code>).</td></tr>
+  <tr><td><code>AssertionError: assert 404 == 201</code></td><td>The POST <code>/api/todos</code> route returned 404. Check that the route is defined as <code>@app.route("/api/todos", methods=["POST"])</code> — the <code>methods</code> list must include <code>"POST"</code>.</td></tr>
+  <tr><td><code>TypeError: Object of type Todo is not JSON serializable</code></td><td>You are passing the Todo object directly to <code>jsonify()</code> instead of calling <code>.to_dict()</code>. Change <code>jsonify(todo)</code> to <code>jsonify(todo.to_dict())</code>.</td></tr>
+  <tr><td><code>RuntimeError: Working outside of application context</code></td><td>The <code>conftest.py</code> pushes an app context, but one of your route handlers may be calling <code>db.session</code> outside of a request. This usually means a typo in a route definition.</td></tr>
+</table>
+
+<div class="info">
+  <strong>Still stuck?</strong> Try these tools in order:
+  <ol>
+    <li><strong>Diff checker:</strong> <code>python scripts/diff_check.py</code> — compares every line of your code against the solutions. Green <code>+</code> lines are missing from your code. Red <code>-</code> lines are extra or wrong. Run it for a single file too: <code>python scripts/diff_check.py app.py</code>.</li>
+    <li><strong>Reveal solutions:</strong> <code>bash scripts/reveal_solutions.sh</code> — copies the complete reference implementation into <code>app/</code>. Compare the files side by side.</li>
+    <li><strong>Reset and retry:</strong> <code>bash scripts/reset_exercises.sh</code> — restores the stubs so you can try again.</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<!-- 1d: app.py -->
+<!-- ============================================================ -->
+
+<h3 id="exercise-app">1d. app.py — The Flask Application</h3>
+
+<p>
+  This is the largest file. Open <code>app/app.py</code>. The stub has the Flask app object created and routes defined as empty functions with <code>pass</code>. You will fill in every function.
+</p>
+
+<p>The file is built in six layers. Type each layer, then save. Do not move to the next layer until the current one is typed.</p>
+
+<h4>Layer 1 — Imports</h4>
+
+<p>At the top of <code>app/app.py</code>, after <code>from flask_migrate import Migrate</code>, add these imports:</p>
+
+<pre><code class="label">app/app.py — add these imports</code>from prometheus_client import Counter, Histogram, generate_latest, REGISTRY
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor</pre>
+
+<table>
+  <tr><th>Import</th><th>Why you need it</th></tr>
+  <tr><td><code>Counter, Histogram</code></td><td>Prometheus metric types — count requests and measure latency</td></tr>
+  <tr><td><code>generate_latest, REGISTRY</code></td><td>Serializes all Prometheus metrics into the text format that Prometheus scrapes</td></tr>
+  <tr><td><code>trace</code></td><td>OpenTelemetry's main module — gives you <code>trace.get_tracer()</code></td></tr>
+  <tr><td><code>FlaskInstrumentor</code></td><td>Auto-instruments Flask to create spans for every HTTP request</td></tr>
+  <tr><td><code>OTLPSpanExporter</code></td><td>Sends span data to Tempo over HTTP</td></tr>
+  <tr><td><code>TracerProvider, BatchSpanProcessor</code></td><td>SDK classes that manage the tracing pipeline</td></tr>
+</table>
+
+<p>Remove the TODO import comments (the lines starting with <code># TODO: Import ...</code>). Your top section should now have real imports instead of comments.</p>
+
+<h4>Layer 2 — Prometheus Metrics</h4>
+
+<p>Find the comment <code># TODO: Create Prometheus metrics</code>. Delete it. Type these three metric definitions in its place:</p>
+
+<pre><code class="label">app/app.py — Prometheus metrics</code>REQUEST_COUNT = Counter(
+    "app_requests_total", "Total requests",
+    ["method", "endpoint", "status"]
+)
+REQUEST_LATENCY = Histogram(
+    "app_request_latency_seconds", "Request latency in seconds",
+    ["method", "endpoint"]
+)</pre>
+
+<p>Each metric has three parts:</p>
+<ul>
+  <li><strong>Name</strong> (e.g. <code>"app_requests_total"</code>) — appears in Prometheus and in the <code>/metrics</code> output</li>
+  <li><strong>Help text</strong> (e.g. <code>"Total requests"</code>) — describes what the metric measures</li>
+  <li><strong>Labels</strong> (e.g. <code>["method", "endpoint", "status"]</code>) — dimensions you can filter and aggregate by in PromQL</li>
+</ul>
+
+<div class="info">
+  <strong>Naming convention:</strong> Prometheus metric names use underscores. Application-specific metrics are prefixed with <code>app_</code> to avoid collisions with system metrics.
+</div>
+
+<h4>Layer 3 — OpenTelemetry Setup</h4>
+
+<p>Find the comment <code># TODO: Set up OpenTelemetry</code>. Delete it and type:</p>
+
+<pre><code class="label">app/app.py — OpenTelemetry setup</code>tracer_provider = TracerProvider()
+otlp_exporter = OTLPSpanExporter(
+    endpoint=Config.OTEL_EXPORTER_OTLP_ENDPOINT
+)
+tracer_provider.add_span_processor(
+    BatchSpanProcessor(otlp_exporter)
+)
+trace.set_tracer_provider(tracer_provider)
+
+FlaskInstrumentor().instrument_app(app)
+tracer = trace.get_tracer(__name__)</pre>
+
+<p>Reading this top to bottom:</p>
+<table>
+  <tr><th>Line</th><th>What it does</th></tr>
+  <tr><td><code>TracerProvider()</code></td><td>Creates the SDK's trace pipeline. Think of it as the engine that creates and manages spans.</td></tr>
+  <tr><td><code>OTLPSpanExporter(...)</code></td><td>Configures where spans are sent. Reads the endpoint from <code>Config</code>, which defaults to <code>http://tempo:4318</code>.</td></tr>
+  <tr><td><code>BatchSpanProcessor(...)</code></td><td>Wraps the exporter to batch spans and send them in the background. This prevents tracing from slowing down your HTTP requests.</td></tr>
+  <tr><td><code>trace.set_tracer_provider(...)</code></td><td>Makes this provider the global default. Any code that calls <code>trace.get_tracer()</code> anywhere in your app will use this provider.</td></tr>
+  <tr><td><code>FlaskInstrumentor().instrument_app(app)</code></td><td>Monkey-patches Flask to automatically create a span for every incoming HTTP request. No manual instrumentation needed for basic tracing.</td></tr>
+  <tr><td><code>trace.get_tracer(__name__)</code></td><td>Gets a tracer instance for creating custom spans in your route handlers. <code>__name__</code> becomes the tracer's name in the trace UI.</td></tr>
+</table>
+
+<h4>Layer 4 — Request Hooks</h4>
+
+<p>Find the TODO comments for <code>before_request</code> and <code>after_request</code>. Replace them with:</p>
+
+<pre><code class="label">app/app.py — request hooks</code>@app.before_request
+def before_request():
+    request._start_time = time.time()
+
+
+@app.after_request
+def after_request(response):
+    if hasattr(request, "_start_time"):
+        latency = time.time() - request._start_time
+        REQUEST_LATENCY.labels(
+            method=request.method, endpoint=request.path
+        ).observe(latency)
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=request.path,
+        status=response.status_code,
+    ).inc()
+    return response</pre>
+
+<p>What this does:</p>
+<ul>
+  <li><code>before_request</code> runs before every route handler. It stamps the start time onto the request object.</li>
+  <li><code>after_request</code> runs after every route handler (even if it raised an exception). It calculates how long the request took, records the duration in the <code>REQUEST_LATENCY</code> histogram, and increments the <code>REQUEST_COUNT</code> counter with the HTTP method, path, and status code.</li>
+  <li>The <code>if hasattr(...)</code> guard prevents errors if <code>before_request</code> was somehow skipped.</li>
+</ul>
+
+<div class="info">
+  <strong>Why the underscore in <code>request._start_time</code>?</strong>
+  <p>
+    In Python, underscores in variable names are conventions that signal intent:
+  </p>
+  <table>
+    <tr><th>Pattern</th><th>Example from this project</th><th>Meaning</th></tr>
+    <tr>
+      <td><code>_single_leading</code></td>
+      <td><code>request._start_time</code>, <code>_db</code> in tests</td>
+      <td>"This is internal/private — use at your own risk." It is a convention, not enforced. You can still access it, but the underscore warns other developers it is an implementation detail that could change.</td>
+    </tr>
+    <tr>
+      <td><code>__double_leading_and_trailing__</code></td>
+      <td><code>__name__</code>, <code>__tablename__</code>, <code>__init__</code></td>
+      <td>"Dunder" (double underscore) methods are Python's magic hooks. <code>__name__</code> holds the module name (set by Python itself). <code>__tablename__</code> is read by SQLAlchemy to know the database table. <code>__init__</code> is the constructor. You define these to tell Python or a library how to treat your object.</td>
+    </tr>
+    <tr>
+      <td><code>_single_standalone</code></td>
+      <td><code>for _ in range(5):</code></td>
+      <td>"I don't care about this value." A throwaway variable — you are required to unpack something but have no use for it.</td>
+    </tr>
+  </table>
+  <p><code>request._start_time</code> uses a single leading underscore because it is a custom attribute we attached to Flask's built-in <code>request</code> object. The underscore says "this is not a standard Flask attribute — we added it ourselves and it is internal to this function." Without the underscore it would still work, but the convention helps other developers reading your code distinguish between Flask's official attributes (<code>request.method</code>, <code>request.path</code>) and the ones you attached temporarily.</p>
+</div>
+
+<div class="warn">
+  <strong>Order matters:</strong> <code>before_request</code> and <code>after_request</code> must be defined <strong>above</strong> the route handlers in the file. Flask processes decorators in order. If you place them below a route, that route will not trigger the hooks.
+</div>
+
+<h4>Layer 5 — Route Handlers</h4>
+
+<p>Each route handler currently has <code>pass</code> as its body. Replace every <code>pass</code> with real code.</p>
+
+<p><strong>Two ways to do this:</strong></p>
+<ul>
+  <li><strong>All at once</strong> (realistic): Write all 10 routes, then run <code>pytest app/tests/ -v</code> once. If some fail, use the error messages to figure out which route has the bug.</li>
+  <li><strong>One at a time</strong> (teaching mode): Write one route, run <code>pytest</code>, watch the passing count climb. This helps isolate mistakes — if test 4 fails, the bug is probably in route 4.</li>
+</ul>
+<p>Most developers write a whole file then test. But when you are learning a new language or framework, testing one piece at a time makes debugging easier because you know exactly where the problem is. Pick whichever approach feels right.</p>
+
+<p>The route boxes below show both the code and how many tests pass at each stage so you can track your progress either way.</p>
+
+<div class="step-box">
+  <strong>Route 1: /health</strong>
+  <p>Replace <code>pass</code> in <code>def health():</code> with:</p>
+  <pre><code>    return jsonify({"status": "healthy"}), 200</code></pre>
+  <p><code>jsonify()</code> converts a Python dict to a JSON response and sets the <code>Content-Type</code> header to <code>application/json</code>. The <code>200</code> is the HTTP status code.</p>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>1 test passes</strong> (<code>test_health</code>).</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 2: /ready</strong>
+  <p>Replace <code>pass</code> in <code>def ready():</code> with:</p>
+  <pre><code>    try:
+        db.session.execute(db.text("SELECT 1"))
+        return jsonify({"status": "ready", "database": "connected"}), 200
+    except Exception as e:
+        return jsonify({"status": "not ready", "database": str(e)}), 503</code></pre>
+  <p>This executes a raw SQL <code>SELECT 1</code> against PostgreSQL. If the database responds, the app reports ready (200). If the query fails (database is down, network issue, wrong credentials), it catches the exception and returns 503 — the HTTP status for "service unavailable."</p>
+  <p>Kubernetes uses this endpoint to decide whether to send traffic to this pod. A 503 response tells Kubernetes to route requests elsewhere.</p>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>2 tests pass</strong> (<code>test_health</code>, <code>test_ready</code>).</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 3: /metrics</strong>
+  <p>Replace <code>pass</code> in <code>def metrics():</code> with:</p>
+  <pre><code>    return generate_latest(REGISTRY), 200, {
+        "Content-Type": "text/plain; charset=utf-8"
+    }</code></pre>
+  <p><code>generate_latest(REGISTRY)</code> serializes all registered Prometheus metrics into the Prometheus text exposition format. The third tuple element is custom headers — Prometheus requires <code>Content-Type: text/plain</code> to parse the response.</p>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>3 tests pass</strong> (health, ready, metrics).</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 4: GET /api/todos — list all todos</strong>
+  <p>Replace <code>pass</code> in <code>def list_todos():</code> with:</p>
+  <pre><code>    with tracer.start_as_current_span("list_todos"):
+        todos = Todo.query.order_by(Todo.created_at.desc()).all()
+        return jsonify([t.to_dict() for t in todos])</code></pre>
+  <p><code>tracer.start_as_current_span("list_todos")</code> creates a child span named "list_todos" inside the automatic Flask span. This lets you see in Tempo exactly how long the database query took vs. the serialization.</p>
+  <p><code>Todo.query</code> is SQLAlchemy's query interface. <code>.order_by(...)</code> sorts newest-first. <code>.all()</code> executes the query and returns every row. The list comprehension calls <code>.to_dict()</code> on each model so the response is JSON-safe.</p>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>4 tests pass</strong> (+ <code>test_list_todos_empty</code>).</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 5: POST /api/todos — create a todo</strong>
+  <p>Replace <code>pass</code> in <code>def create_todo():</code> with:</p>
+  <pre><code>    with tracer.start_as_current_span("create_todo"):
+        data = request.get_json()
+        if not data or not data.get("title"):
+            return jsonify({"error": "title is required"}), 400
+        todo = Todo(title=data["title"])
+        db.session.add(todo)
+        db.session.commit()
+        return jsonify(todo.to_dict()), 201</code></pre>
+  <p>Line by line:</p>
+  <ul>
+    <li><code>request.get_json()</code> — parses the JSON request body into a Python dict. Returns <code>None</code> if the body is not valid JSON.</li>
+    <li><code>if not data or not data.get("title")</code> — validates that a title was provided. Returns HTTP 400 (Bad Request) if missing.</li>
+    <li><code>Todo(title=data["title"])</code> — creates a new SQLAlchemy model instance. Only <code>title</code> is set; <code>completed</code> defaults to <code>False</code> from the model definition.</li>
+    <li><code>db.session.add(todo)</code> — stages the new row for insertion.</li>
+    <li><code>db.session.commit()</code> — flushes the staged changes to PostgreSQL. Without this, the row is never persisted.</li>
+    <li><code>201</code> — HTTP 201 means "Created." This signals to the client that a resource was created, as opposed to 200 which is a generic success.</li>
+  </ul>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>6 tests pass</strong> (+ <code>test_create_todo</code>, <code>test_create_todo_no_title</code>).</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 6: GET /api/todos/:id — get a single todo</strong>
+  <p>Replace <code>pass</code> in <code>def get_todo(todo_id):</code> with:</p>
+  <pre><code>    with tracer.start_as_current_span("get_todo"):
+        todo = db.session.get(Todo, todo_id)
+        if not todo:
+            return jsonify({"error": "not found"}), 404
+        return jsonify(todo.to_dict())</code></pre>
+  <p><code>db.session.get(Todo, todo_id)</code> fetches a row by primary key. This is the modern SQLAlchemy 2.0 style (replaces the older <code>Todo.query.get()</code>).</p>
+  <p>If no row has that ID, Flask returns 404 with a JSON error body. The tests check for exactly this response.</p>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>8 tests pass</strong> (+ <code>test_get_todo</code>, <code>test_get_todo_not_found</code>).</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 7: PUT /api/todos/:id — update a todo</strong>
+  <p>Replace <code>pass</code> in <code>def update_todo(todo_id):</code> with:</p>
+  <pre><code>    with tracer.start_as_current_span("update_todo"):
+        todo = db.session.get(Todo, todo_id)
+        if not todo:
+            return jsonify({"error": "not found"}), 404
+        data = request.get_json()
+        if "title" in data:
+            todo.title = data["title"]
+        if "completed" in data:
+            todo.completed = data["completed"]
+        db.session.commit()
+        return jsonify(todo.to_dict())</code></pre>
+  <p>The <code>if "title" in data</code> pattern makes each field optional. A client can send <code>{"completed": true}</code> without re-sending the title. The <code>onupdate</code> lambda in the model automatically refreshes <code>updated_at</code>.</p>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>9 tests pass</strong> (+ <code>test_update_todo</code>).</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 8: DELETE /api/todos/:id — delete a todo</strong>
+  <p>Replace <code>pass</code> in <code>def delete_todo(todo_id):</code> with:</p>
+  <pre><code>    with tracer.start_as_current_span("delete_todo"):
+        todo = db.session.get(Todo, todo_id)
+        if not todo:
+            return jsonify({"error": "not found"}), 404
+        db.session.delete(todo)
+        db.session.commit()
+        return jsonify({"message": "deleted"}), 200</code></pre>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — <strong>10 tests pass</strong> (+ <code>test_delete_todo</code>). All route tests pass!</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 9: GET / — API root</strong>
+  <p>Replace <code>pass</code> in <code>def index():</code> with:</p>
+  <pre><code>    return jsonify({
+        "app": "Portfolio API",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "endpoints": {
+            "health": "/health",
+            "ready": "/ready",
+            "metrics": "/metrics",
+            "todos": "/api/todos",
+        }
+    })</code></pre>
+  <p><strong>Run now:</strong> <code>pytest app/tests/ -v</code> — still 10 passed. Neither <code>/</code> nor <code>/docs</code> have dedicated tests; they are informational endpoints. Move on to Route 10.</p>
+</div>
+
+<div class="step-box">
+  <strong>Route 10: GET /docs — API documentation</strong>
+  <p>Replace <code>pass</code> in <code>def docs():</code> with:</p>
+  <pre><code>    return jsonify({
+        "openapi": "3.0.0",
+        "info": {"title": "Portfolio API", "version": "2.0.0"},
+        "paths": {
+            "/api/todos": {
+                "get": {"summary": "List all todos"},
+                "post": {
+                    "summary": "Create a todo",
+                    "requestBody": {"title": "string"}
+                }
+            },
+            "/api/todos/{id}": {
+                "get": {"summary": "Get a todo"},
+                "put": {"summary": "Update a todo"},
+                "delete": {"summary": "Delete a todo"}
+            }
+        }
+    })</code></pre>
+  <p>This is a minimal inline OpenAPI specification. In production you would use a library like <code>flasgger</code> or <code>apiflask</code>, but for this tutorial the inline dict keeps things simple and dependency-free.</p>
+  <p><strong>Final check:</strong> <code>pytest app/tests/ -v</code> — <strong>10 tests pass</strong>. Every route handler works.</p>
+  <div class="tip" style="margin-top: 12px;">
+    <strong>You wrote an entire Flask API!</strong> 10 tests passing means the health check, readiness probe, metrics endpoint, and all 6 CRUD operations work correctly.
+  </div>
+</div>
+
+<h4>Layer 6 — Remove the TODO comments</h4>
+
+<p>
+  Scroll through the file and remove every remaining line that starts with <code># TODO:</code> or <code>pass # Replace with your code</code>. These were guide markers. The file should now have real code in every function.
+</p>
+
+<div class="warn">
+  <strong>If you see <code>IndentationError</code> or <code>SyntaxError</code> later when running tests:</strong>
+  <ul>
+    <li>Check that every line inside <code>def function():</code> is indented 4 spaces</li>
+    <li>Check that every line inside <code>class Todo:</code> is indented 4 spaces</li>
+    <li>Check that every line inside <code>with ...:</code> is indented another 4 spaces</li>
+    <li>Make sure you are not mixing tabs and spaces — set your editor to use spaces</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 1e: migrations.py -->
+<!-- ============================================================ -->
+
+<h3 id="exercise-migrations">1e. migrations.py — Table Creator</h3>
+
+<p>
+  Open <code>app/migrations.py</code>. It currently contains a comment block. Replace the entire file with:
+</p>
+
+<pre><code class="label">app/migrations.py — complete</code>from app import app
+from models import db
+
+with app.app_context():
+    db.create_all()
+    print("Tables created")</pre>
+
+<p>This script exists so you can create database tables without running the full Flask dev server. The three lines do:</p>
+<ol>
+  <li><strong><code>from app import app</code></strong> — imports the Flask application object. This triggers the <code>app = Flask(__name__)</code> line in <code>app.py</code>, which registers the SQLAlchemy extension and the Config.</li>
+  <li><strong><code>from models import db</code></strong> — imports the database object. By this point, <code>app.py</code> has already called <code>db.init_app(app)</code>, so <code>db</code> knows about the Flask app and which database to connect to.</li>
+  <li><strong><code>with app.app_context():</code></strong> — pushes an application context. Flask extensions (like SQLAlchemy) need this context to access config values and database connections. Without it, you get a <code>RuntimeError: Working outside of application context</code>.</li>
+  <li><strong><code>db.create_all()</code></strong> — inspects all SQLAlchemy models (Todo) and creates the corresponding tables in PostgreSQL. This is useful for development; in production you would use Alembic migrations instead.</li>
+</ol>
+
+<div class="tip">
+  <strong>Run it with:</strong>
+  <pre><code>pip install -r app/requirements.txt
+python app/migrations.py</code></pre>
+  <p>This requires PostgreSQL to be running (e.g., via <code>docker compose up -d postgres</code>).</p>
+</div>
+
+
+
+<h2 id="docker">2. Docker &amp; Compose</h2>
+
+<p>The application Dockerfile uses a Python slim image. Open <code>app/Dockerfile</code> — it is already complete:</p>
+
+<pre><code class="label">app/Dockerfile — already complete</code>FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", \
+     "--access-logfile", "-", "--error-logfile", "-", "app:app"]</pre>
+
+<table>
+  <tr><th>Line</th><th>What it does</th></tr>
+  <tr><td><code>FROM python:3.12-slim</code></td><td>Starts from the official Python 3.12 slim image (~120 MB)</td></tr>
+  <tr><td><code>WORKDIR /app</code></td><td>Sets the working directory inside the container</td></tr>
+  <tr><td><code>COPY requirements.txt .</code></td><td>Copies just the requirements file first for layer caching</td></tr>
+  <tr><td><code>RUN pip install ...</code></td><td>Installs all Python dependencies</td></tr>
+  <tr><td><code>COPY . .</code></td><td>Copies the rest of the application code</td></tr>
+  <tr><td><code>CMD gunicorn ...</code></td><td>Starts Gunicorn (production WSGI server) with 4 workers</td></tr>
+</table>
+
+<p>Two Docker Compose files control which code gets built:</p>
+
+<table>
+  <tr><th>Command</th><th>Builds</th><th>When to use</th></tr>
+  <tr><td><code>docker compose -f docker/docker-compose.yml up</code></td><td>Your <code>app/</code> code</td><td>Testing your exercise implementation</td></tr>
+  <tr><td><code>docker compose -f docker/docker-compose.yml -f docker/docker-compose.solution.yml up</code></td><td>The reference <code>solutions/app/</code> code</td><td>Seeing the app work end-to-end</td></tr>
+</table>
+
+<p>The compose stack starts all 8 services: Flask API, PostgreSQL, Prometheus, Grafana, Loki, Promtail, Tempo, and Alertmanager.</p>
+
+<p>The Flask app defines these endpoints:</p>
+
+<table>
+  <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+  <tr><td><code>/</code></td><td>GET</td><td>API root with links to all endpoints</td></tr>
+  <tr><td><code>/health</code></td><td>GET</td><td>Returns <code>{"status":"healthy"}</code></td></tr>
+  <tr><td><code>/ready</code></td><td>GET</td><td>Checks DB connectivity, returns 503 if down</td></tr>
+  <tr><td><code>/metrics</code></td><td>GET</td><td>Prometheus-format metrics (request count, latency histograms)</td></tr>
+  <tr><td><code>/api/todos</code></td><td>GET</td><td>List all todos (ordered by creation date, descending)</td></tr>
+  <tr><td><code>/api/todos</code></td><td>POST</td><td>Create a new todo (JSON body: <code>{"title": "..."}</code>)</td></tr>
+  <tr><td><code>/api/todos/:id</code></td><td>GET</td><td>Get a single todo by ID</td></tr>
+  <tr><td><code>/api/todos/:id</code></td><td>PUT</td><td>Update title or completed status</td></tr>
+  <tr><td><code>/api/todos/:id</code></td><td>DELETE</td><td>Delete a todo</td></tr>
+  <tr><td><code>/docs</code></td><td>GET</td><td>Inline OpenAPI-style documentation</td></tr>
+</table>
+
+<div class="info">
+  <strong>Basic network concepts used in this table:</strong>
+
+  <h4 style="font-size: 16px; margin: 12px 0 6px;">What is an endpoint?</h4>
+  <p>
+    An <strong>endpoint</strong> is a URL path (the part after the domain name) that represents a specific resource or action in the API. For example, in <code>http://localhost:8000/health</code>, the path <code>/health</code> is the endpoint. Think of it as a door: each endpoint is a different door on the same building (the server). You knock on a specific door to get a specific thing.
+  </p>
+
+  <h4 style="font-size: 16px; margin: 12px 0 6px;">What are HTTP methods (GET, POST, PUT, DELETE)?</h4>
+  <p>
+    HTTP methods are verbs that tell the server what you want to do. They follow the <strong>CRUD</strong> pattern (Create, Read, Update, Delete):
+  </p>
+  <table>
+    <tr><th>Method</th><th>Meaning</th><th>Analogy</th><th>Used for...</th></tr>
+    <tr><td><strong>GET</strong></td><td>Retrieve data</td><td>Reading a menu — you see what is there without changing anything</td><td>Listing todos, viewing one todo, health checks</td></tr>
+    <tr><td><strong>POST</strong></td><td>Create new data</td><td>Placing an order — you send information to create something new</td><td>Creating a new todo</td></tr>
+    <tr><td><strong>PUT</strong></td><td>Update existing data</td><td>Editing an order — you send changes to something that already exists</td><td>Marking a todo as completed</td></tr>
+    <tr><td><strong>DELETE</strong></td><td>Remove data</td><td>Crossing an item off a list — you remove it permanently</td><td>Deleting a todo</td></tr>
+  </table>
+  <p>
+    GET is the only method that should never change data on the server. You can refresh a GET request a hundred times and get the same result. POST, PUT, and DELETE change data.
+  </p>
+
+  <h4 style="font-size: 16px; margin: 12px 0 6px;">What is the <code>:id</code> in <code>/api/todos/:id</code>?</h4>
+  <p>
+    <code>:id</code> is a <strong>URL parameter</strong> — a placeholder for a specific value. When a client calls <code>GET /api/todos/3</code>, Flask captures <code>3</code> as the <code>todo_id</code> variable. The colon marks it as a variable, not a literal part of the path. You never type <code>:id</code> literally — you replace it with an actual ID.
+  </p>
+
+  <h4 style="font-size: 16px; margin: 12px 0 6px;">What do HTTP status codes mean?</h4>
+  <p>
+    Every HTTP response includes a three-digit code telling the client whether the request succeeded:
+  </p>
+  <table>
+    <tr><th>Code</th><th>Name</th><th>What it means</th><th>Used in this project when...</th></tr>
+    <tr><td><strong>200</strong></td><td>OK</td><td>Success — the response body contains what you asked for</td><td>Health check passes, a todo is returned or deleted</td></tr>
+    <tr><td><strong>201</strong></td><td>Created</td><td>A new resource was created successfully</td><td>A new todo is created via POST</td></tr>
+    <tr><td><strong>400</strong></td><td>Bad Request</td><td>The client sent something invalid (missing field, bad JSON)</td><td>A POST has no <code>title</code> field</td></tr>
+    <tr><td><strong>404</strong></td><td>Not Found</td><td>The requested resource does not exist</td><td><code>GET /api/todos/999</code> when todo 999 does not exist</td></tr>
+    <tr><td><strong>503</strong></td><td>Service Unavailable</td><td>The server is alive but cannot handle requests (a dependency like the database is down)</td><td>Database connection fails in the <code>/ready</code> check</td></tr>
+  </table>
+  <p>
+    Codes in the 200s mean success. Codes in the 400s mean the client made a mistake. Codes in the 500s mean the server or a dependency broke.
+  </p>
+</div>
+
+<p>The <code>/ready</code> endpoint is particularly important. Unlike Volume 1 where readiness was a static string, this endpoint actually checks the database connection — the code you wrote in Step 1c:</p>
+
+<pre><code class="label">app/app.py — the readiness probe you wrote</code>@app.route("/ready")
+def ready():
+    try:
+        db.session.execute(db.text("SELECT 1"))
+        return jsonify({"status": "ready", "database": "connected"}), 200
+    except Exception as e:
+        return jsonify({"status": "not ready", "database": str(e)}), 503</pre>
+
+<div class="warn">
+  <strong>Why this matters:</strong> Kubernetes uses the readiness probe to decide whether a pod should receive traffic. If the database is down, the pod reports "not ready" and Kubernetes removes it from the service. This prevents cascading failures — requests do not pile up against a pod that cannot serve them.
+</div>
+
+<p>The Dockerfile and compose file use <strong>Gunicorn</strong> (Green Unicorn), a production-grade WSGI server. The <code>--workers 4</code> flag starts four worker processes, allowing the app to handle up to four requests concurrently. The <code>--access-logfile -</code> and <code>--error-logfile -</code> flags send logs to stdout/stderr so Docker and Loki can collect them.</p>
+
+<h2 id="db-migrations">3. Database Migrations</h2>
+
+<p>
+  Volume 1 had no database. Volume 2 uses PostgreSQL with SQLAlchemy and Alembic for schema migrations. Migrations let you evolve the database schema alongside application code without writing raw SQL by hand.
+</p>
+
+<p>To run migrations locally (after writing the Todo model):</p>
+
+<pre><code class="label">terminal</code># Start the stack (use solution mode if your code is incomplete)
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.solution.yml up --build -d
+
+# Run migrations inside the app container
+docker compose exec app flask db upgrade
+
+# Verify the table was created
+docker compose exec postgres psql -U portfolio -c "\dt"</code></pre>
+
+<p>Expected output:</p>
+<pre><code>               List of relations
+ Schema |     Name      | Type  |  Owner
+--------+---------------+-------+----------
+ public | alembic_version | table | portfolio
+ public | todos           | table | portfolio</code></pre>
+
+<p>The <code>alembic_version</code> table tracks which migration revision is currently applied. The <code>todos</code> table is your Todo model.</p>
+
+<div class="tip">
+  <strong>Production pattern:</strong> In the CI/CD pipeline, migrations run as a separate job before the new pods start. You can use an <code>initContainer</code> in Kubernetes to run <code>flask db upgrade</code> before the main app container starts.
+</div>
+
+<h2 id="helm">4. Helm Packaging</h2>
+
+<h3 id="helm-why">Why Helm?</h3>
+
+<p>
+  In Volume 1 you applied Kubernetes manifests with <code>kubectl apply -f</code>. That works for small projects but breaks down when you need:
+</p>
+<ul>
+  <li><strong>Environment overlays:</strong> Different values for staging vs production (replicas, resources, URLs)</li>
+  <li><strong>Template reusability:</strong> One chart deployed to many environments</li>
+  <li><strong>Release management:</strong> Track what was deployed, when, and with which values</li>
+  <li><strong>Rollbacks:</strong> <code>helm rollback</code> reverts to a previous revision</li>
+</ul>
+
+<p>
+  Helm packages Kubernetes YAML into <strong>charts</strong>. A chart is a directory with a standard structure.
+</p>
+
+<h3 id="helm-structure">Chart Structure</h3>
+
+<pre><code class="label">helm/portfolio-app/</code>helm/portfolio-app/
+  Chart.yaml          # Metadata: name, version, description
+  values.yaml         # Default configuration values
+  values-staging.yaml # Staging-specific overrides
+  values-production.yaml   # Production-specific overrides
+  templates/
+    _helpers.tpl      # Reusable named templates
+    deployment.yaml   # Deployment definition (uses {{ .Values.replicaCount }})
+    service.yaml      # Service definition
+    ingress.yaml      # Ingress with TLS
+    hpa.yaml          # HorizontalPodAutoscaler
+    pdb.yaml          # PodDisruptionBudget
+    serviceaccount.yaml
+    configmap.yaml
+    secret.yaml
+    networkpolicy.yaml
+    tests/
+      test-connection.yaml  # Helm test pod</pre>
+
+<p>
+  The key idea is <strong>parameterization</strong>. Instead of hardcoding replica count, image tag, or resource limits, the templates use Go template syntax:
+</p>
+
+<pre><code class="label">helm/portfolio-app/templates/deployment.yaml (excerpt)</code>spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    spec:
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"</pre>
+
+<p>You deploy with different values per environment:</p>
+
+<pre><code class="label">terminal</code># Deploy to staging
+helm upgrade --install portfolio-app ./helm/portfolio-app \
+  --namespace staging \
+  --values ./helm/portfolio-app/values-staging.yaml \
+  --set image.tag=v2.0.0
+
+# Deploy to production
+helm upgrade --install portfolio-app ./helm/portfolio-app \
+  --namespace production \
+  --values ./helm/portfolio-app/values-production.yaml \
+  --set image.tag=v2.0.0</pre>
+
+<table>
+  <tr><th>values.yaml</th><th>values-staging.yaml</th><th>values-production.yaml</th></tr>
+  <tr><td><code>replicaCount: 3</code></td><td><code>replicaCount: 2</code></td><td><code>replicaCount: 5</code></td></tr>
+  <tr><td>CPU: 256m request, 500m limit</td><td>CPU: 128m request, 256m limit</td><td>CPU: 512m request, 1 limit</td></tr>
+  <tr><td>HPA: 3&ndash;10 replicas</td><td>HPA: 2&ndash;5 replicas</td><td>HPA: 5&ndash;20 replicas</td></tr>
+  <tr><td>PDB: minAvailable 2</td><td>PDB: minAvailable 1</td><td>PDB: minAvailable 3</td></tr>
+</table>
+
+<div class="info">
+  <strong>Helm best practices:</strong> Store values files in Git alongside your chart. Use <code>--set</code> only for values that change per deploy (like image tag or database password). Never commit secrets to values files — use Kubernetes External Secrets or Sealed Secrets.
+</div>
+
+<h2 id="gitops-argocd">5. GitOps with ArgoCD</h2>
+
+<p>
+  Volume 1 used GitHub Actions to run <code>kubectl set image</code> directly. That works but has a problem: <strong>drift</strong>. If someone manually edits a deployment with <code>kubectl edit</code>, the cluster state diverges from what CI deployed.
+</p>
+
+<p>
+  <strong>GitOps</strong> solves this by making Git the single source of truth. ArgoCD continuously monitors a Git repository and synchronizes the cluster to match. If someone edits a resource directly, ArgoCD reverts it. If you merge a PR, ArgoCD applies the change automatically.
+</p>
+
+<h3 id="argocd-install">Installing ArgoCD</h3>
+
+<pre><code class="label">terminal</code># Create namespace
+kubectl create namespace argocd
+
+# Install ArgoCD
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Wait for all pods to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=5m
+
+# Get the initial admin password
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+
+# Port-forward to access the UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443</pre>
+
+<h3 id="argocd-apps">Application Definitions</h3>
+
+<p>ArgoCD Applications tell ArgoCD what to deploy and where. Here is the staging application:</p>
+
+<pre><code class="label">argocd/application-staging.yaml</code>apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: portfolio-staging
+  namespace: argocd
+spec:
+  project: portfolio
+  source:
+    repoURL: https://github.com/yourorg/devops-portfolio2.git
+    targetRevision: main
+    path: helm/portfolio-app
+    helm:
+      valueFiles:
+        - values-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: staging
+  syncPolicy:
+    automated:
+      prune: true      # Delete resources removed from Git
+      selfHeal: true   # Revert manual changes</pre>
+
+<div class="warn">
+  <strong>Important:</strong> With <code>selfHeal: true</code>, ArgoCD will undo any <code>kubectl edit</code> or <code>kubectl patch</code> commands. This is the desired behavior — Git is the source of truth.
+</div>
+
+<p>The <code>argocd/project.yaml</code> defines the project with allowed source repos and destination clusters:</p>
+
+<pre><code class="label">argocd/project.yaml (excerpt)</code>spec:
+  sourceRepos:
+    - "https://github.com/yourorg/devops-portfolio2.git"
+  destinations:
+    - namespace: staging
+      server: https://kubernetes.default.svc
+    - namespace: production
+      server: https://kubernetes.default.svc</pre>
+
+<h2 id="ci-cd">6. Enhanced CI/CD</h2>
+
+<p>
+  Volume 1 CI ran linting, HTML validation, Terraform validation, and Docker build. Volume 2 adds integration tests, Trivy vulnerability scanning, and Helm-based deployment.
+</p>
+
+<h3 id="ci-tests">Integration Tests</h3>
+
+<p>Unit tests run with pytest against an in-memory SQLite database:</p>
+
+<pre><code class="label">.github/workflows/ci.yml (excerpt)</code>test:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - run: pip install -r app/requirements.txt
+    - run: pytest app/tests/ --cov=app --cov-report=term \
+            --junitxml=test-results.xml
+    - uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: pytest
+        path: test-results.xml
+        reporter: java-junit</pre>
+
+<p>The test suite covers all API endpoints:</p>
+
+<pre><code class="label">app/tests/test_api.py (excerpt)</code>def test_create_todo(client):
+    resp = client.post("/api/todos", json={"title": "test todo"})
+    assert resp.status_code == 201
+    assert resp.get_json()["title"] == "test todo"
+
+def test_create_todo_no_title(client):
+    resp = client.post("/api/todos", json={})
+    assert resp.status_code == 400
+
+def test_get_todo_not_found(client):
+    resp = client.get("/api/todos/999")
+    assert resp.status_code == 404</pre>
+
+<h3 id="ci-scan">Security Scanning with Trivy</h3>
+
+<p>
+  <strong>Trivy</strong> is an open-source vulnerability scanner for containers and filesystems. The CI pipeline scans both the repository filesystem and the built Docker image:
+</p>
+
+<pre><code class="label">.github/workflows/ci.yml (excerpt)</code>security-scan:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        scan-type: "fs"
+        scan-ref: "."
+        format: "sarif"
+        output: "trivy-results.sarif"
+        severity: "HIGH,CRITICAL"
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: "trivy-results.sarif"</pre>
+
+<div class="info">
+  <strong>What Trivy finds:</strong> Known CVEs in OS packages (apt, apk), language-specific packages (pip, npm), and misconfigurations in IaC files (Dockerfile, Kubernetes YAML). Results appear in the GitHub Security tab under "Code scanning alerts."
+</div>
+
+<h3 id="cd-helm">Helm Deploy</h3>
+
+<p>The CD workflow deploys using <code>helm upgrade --install</code> instead of <code>kubectl set image</code>:</p>
+
+<pre><code class="label">.github/workflows/cd.yml (excerpt)</code>deploy-staging:
+  needs: [build]
+  runs-on: ubuntu-latest
+  environment: staging
+  steps:
+    - uses: actions/checkout@v4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }}
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install portfolio-app ./helm/portfolio-app \
+          --namespace staging \
+          --values ./helm/portfolio-app/values-staging.yaml \
+          --set image.tag=${{ needs.build.outputs.tag }} \
+          --set config.database.password=${{ secrets.DB_PASSWORD }} \
+          --wait --timeout 5m</pre>
+
+<h2 id="observability">7. Observability Stack</h2>
+
+<p>
+  Volume 1 had Prometheus and Grafana for metrics. Volume 2 adds <strong>logs</strong> (Loki) and <strong>distributed tracing</strong> (Tempo) to complete the three pillars of observability.
+</p>
+
+<h3 id="loki">Loki: Log Aggregation</h3>
+
+<p>
+  <strong>Loki</strong> is a horizontally-scalable, highly-available log aggregation system from Grafana Labs. Unlike Elasticsearch, Loki does not index the content of logs — it indexes only labels (like <code>container</code>, <code>namespace</code>, <code>job</code>). This makes it cheaper and faster for Kubernetes environments.
+</p>
+
+<p><strong>Promtail</strong> is the agent that collects logs and sends them to Loki:</p>
+
+<pre><code class="label">monitoring/promtail/promtail-config.yml</code>clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: "container"</pre>
+
+<p>In Grafana, you can query logs with LogQL:</p>
+
+<pre><code class="label">Grafana LogQL query</code>{container="portfolio-api"} |= "error"
+{container="portfolio-api"} |= "POST" | json</pre>
+
+<h3 id="tempo">Tempo: Distributed Tracing</h3>
+
+<p>
+  <strong>Tempo</strong> is a distributed tracing backend. The Flask app is instrumented with OpenTelemetry, which sends trace data to Tempo:
+</p>
+
+<pre><code class="label">app/app.py — OpenTelemetry setup</code>from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+tracer_provider = TracerProvider()
+otlp_exporter = OTLPSpanExporter(endpoint="http://tempo:4318")
+tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+trace.set_tracer_provider(tracer_provider)
+
+FlaskInstrumentor().instrument_app(app)</pre>
+
+<p>Custom spans wrap business logic:</p>
+
+<pre><code class="label">app/app.py — custom span</code>@app.route("/api/todos", methods=["GET"])
+def list_todos():
+    with tracer.start_as_current_span("list_todos"):
+        todos = Todo.query.order_by(Todo.created_at.desc()).all()
+        return jsonify([t.to_dict() for t in todos])</pre>
+
+<p>Traces are visible in Grafana Explore (using the Tempo data source) and can be correlated with logs.</p>
+
+<h3 id="custom-metrics">Custom App Metrics</h3>
+
+<p>
+  Volume 1 exposed static metrics from Nginx. Volume 2 generates real metrics using the Prometheus Python client:
+</p>
+
+<pre><code class="label">app/app.py — Prometheus metrics</code>REQUEST_COUNT = Counter(
+    "app_requests_total", "Total requests",
+    ["method", "endpoint", "status"]
+)
+REQUEST_LATENCY = Histogram(
+    "app_request_latency_seconds", "Request latency",
+    ["method", "endpoint"]
+)
+
+@app.after_request
+def after_request(response):
+    latency = time.time() - request._start_time
+    REQUEST_LATENCY.labels(
+        method=request.method, endpoint=request.path
+    ).observe(latency)
+    REQUEST_COUNT.labels(
+        method=request.method, endpoint=request.path,
+        status=response.status_code
+    ).inc()
+    return response</pre>
+
+<p>These metrics appear at <code>/metrics</code> and are scraped by Prometheus:</p>
+
+<pre><code class="label">monitoring/prometheus/prometheus.yml</code>scrape_configs:
+  - job_name: "portfolio-app"
+    static_configs:
+      - targets: ["app:8000"]
+    metrics_path: /metrics</pre>
+
+<h3 id="alertmanager">Alertmanager</h3>
+
+<p>
+  Prometheus fires alerts defined in <code>alerts.yml</code>. Alertmanager routes them to Slack (or email, PagerDuty, etc.):
+</p>
+
+<pre><code class="label">monitoring/alertmanager/alertmanager.yml</code>route:
+  group_by: ["alertname", "severity"]
+  receiver: "default"
+  routes:
+    - match:
+        severity: critical
+      receiver: "critical"
+
+receivers:
+  - name: "default"
+    slack_configs:
+      - api_url: "https://hooks.slack.com/services/T00/XXX/YYY"
+        channel: "#alerts"
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.summary }}'</pre>
+
+<p>Alert rules include:</p>
+
+<table>
+  <tr><th>Alert</th><th>Condition</th><th>Severity</th></tr>
+  <tr><td>PortfolioAppDown</td><td><code>up == 0</code> for 1 minute</td><td>critical</td></tr>
+  <tr><td>PortfolioAppNotReady</td><td><code>probe_success == 0</code> for 2 minutes</td><td>warning</td></tr>
+  <tr><td>HighRequestLatency</td><td>P95 latency > 1s for 5 minutes</td><td>warning</td></tr>
+  <tr><td>HighErrorRate</td><td>5xx rate > 5% for 5 minutes</td><td>critical</td></tr>
+</table>
+
+<h2 id="security">7. Security</h2>
+
+<h3 id="network-policies">Network Policies</h3>
+
+<p>
+  By default, Kubernetes allows all pod-to-pod traffic. <strong>Network Policies</strong> restrict which pods can communicate. The Helm chart includes a network policy that:
+</p>
+<ul>
+  <li>Allows ingress only from the <code>ingress-nginx</code> namespace and Prometheus pods</li>
+  <li>Allows egress only to the database (port 5432) and external HTTPS (443)</li>
+</ul>
+
+<pre><code class="label">helm/portfolio-app/templates/networkpolicy.yaml (excerpt)</code>spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: portfolio-app
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 5432
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - port: 443</pre>
+
+<h3 id="trivy">Trivy Scanning</h3>
+
+<p>
+  Trivy runs in CI against both the filesystem and the built Docker image. The results appear as SARIF output and are uploaded to GitHub's security dashboard.
+</p>
+
+<p>To scan locally:</p>
+
+<pre><code class="label">terminal</code># Scan the filesystem
+docker run --rm -v .:/repo aquasec/trivy:latest fs /repo
+
+# Scan a Docker image
+docker run --rm aquasec/trivy:latest image ghcr.io/yourorg/portfolio-app:latest</pre>
+
+<h2 id="synthetic-monitoring">8. Synthetic Monitoring</h2>
+
+<p>
+  <strong>Synthetic monitoring</strong> means running periodic tests against your production endpoints from outside your cluster. This catches issues that your internal Prometheus might miss (DNS resolution, TLS, CDN, ISP routing).
+</p>
+
+<p>The project includes a smoke test script (<code>scripts/smoke_test.sh</code>) that exercises the full API:</p>
+
+<pre><code class="label">scripts/smoke_test.sh</code>#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="${1:-http://localhost:8000}"
+
+check() {
+    local desc="$1" url="$2" expected="$3"
+    echo -n "  $desc ... "
+    if curl -sf "$url" | grep -q "$expected"; then
+        echo "PASS"
+    else
+        echo "FAIL"; exit 1
+    fi
+}
+
+check "Health"   "$BASE_URL/health"   "healthy"
+check "Ready"    "$BASE_URL/ready"    "ready"
+check "Metrics"  "$BASE_URL/metrics"  "app_requests_total"
+check "List Todos" "$BASE_URL/api/todos" "\\["</pre>
+
+<div class="tip">
+  <strong>Running synthetic checks in production:</strong> Deploy this as a CronJob in your cluster, or use a managed service like Checkly, Grafana Cloud Synthetic Monitoring, or AWS CloudWatch Synthetics.
+</div>
+
+<h2 id="local-lab">9. Local Lab Walkthrough</h2>
+
+<p>Let's put it all together. Start the full stack locally:</p>
+
+<div class="step-box">
+  <p>Start all services with Docker Compose (use solution mode if your app.py is incomplete):</p>
+  <pre><code># Your code:
+docker compose -f docker/docker-compose.yml up --build -d
+
+# Reference implementation:
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.solution.yml up --build -d</code></pre>
+  <p>This starts: Flask API, PostgreSQL, Prometheus, Grafana, Loki, Promtail, Tempo, and Alertmanager.</p>
+</div>
+
+<div class="step-box">
+  <p>Run database migrations:</p>
+  <pre><code>docker compose exec app flask db upgrade</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Test the API endpoints:</p>
+  <pre><code># Health check
+curl http://localhost:8000/health
+
+# Create a todo
+curl -X POST http://localhost:8000/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Learn Helm"}'
+
+# List todos
+curl http://localhost:8000/api/todos
+
+# Check metrics
+curl http://localhost:8000/metrics</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Open Grafana at <code>http://localhost:3000</code> (admin/admin) and explore:</p>
+  <ul>
+    <li><strong>App Overview</strong> dashboard — request rate, latency, error rate</li>
+    <li><strong>Logs & Tracing</strong> dashboard — application logs from Loki</li>
+    <li>Explore tab — query Tempo traces</li>
+  </ul>
+</div>
+
+<div class="step-box">
+  <p>Run the seed script:</p>
+  <pre><code>docker compose exec app python /app/seed_db.py</code></pre>
+  <p>Or from the host:</p>
+  <pre><code>python scripts/seed_db.py http://localhost:8000</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Run unit tests against your code in <code>app/</code>:</p>
+  <pre><code>pip install -r app/requirements.txt
+pytest app/tests/ --cov=app --cov-report=term -v</code></pre>
+  <p>Expected output: 9 passed, ~87% coverage.</p>
+  <p>Or inside the container (if running the solution stack):</p>
+  <pre><code>docker compose exec app pytest --cov=app --cov-report=term</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Run the smoke test script:</p>
+  <pre><code>bash scripts/smoke_test.sh http://localhost:8000</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Lint the Helm chart:</p>
+  <pre><code>helm lint helm/portfolio-app/
+helm template helm/portfolio-app/ --debug > /dev/null</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Validate Terraform:</p>
+  <pre><code>cd infrastructure/terraform
+terraform init -backend=false
+terraform validate
+terraform plan -var="environment=staging"</code></pre>
+</div>
+
+<h2 id="ansible-ssh">10. Ansible over SSH with a Docker Linux Target</h2>
+
+<p>
+  Volume 1 introduced Ansible with localhost and a small optional SSH practice
+  lab. This Volume 2 lab makes the remote-server model more explicit: Docker
+  runs an Ubuntu Linux container with SSH and Python installed, and Ansible
+  connects to it as if it were a remote host.
+</p>
+
+<div class="warn">
+  <strong>Local-only safety note:</strong> This lab is for learning Ansible SSH
+  mechanics only. Do not expose this SSH container to the internet, and do not
+  reuse the password <code>ansible123</code>. AWS and EC2 remote hosts are
+  optional later; they are not required for this Docker SSH lab.
+</div>
+
+<p>
+  Open <code>ansible/ssh-lab/</code>. The lab contains:
+</p>
+
+<table>
+  <tr><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>Dockerfile</code></td><td>Builds a small Ubuntu SSH target with <code>python3</code>, <code>sudo</code>, and an <code>ansible</code> user</td></tr>
+  <tr><td><code>docker-compose.yml</code></td><td>Runs the SSH target on <code>localhost:2222</code></td></tr>
+  <tr><td><code>inventory.ini</code></td><td>Tells Ansible how to connect to the Docker SSH target</td></tr>
+  <tr><td><code>docker-ssh-playbook.yml</code></td><td>Runs simple tasks over SSH and creates a practice file inside the container</td></tr>
+</table>
+
+<pre><code>cd ansible/ssh-lab
+
+docker compose up -d --build
+
+ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory.ini workers -m ping
+
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini docker-ssh-playbook.yml
+
+docker compose down</code></pre>
+
+<table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td><code>docker compose up -d --build</code></td><td>Builds and starts the SSH target container in the background</td></tr>
+  <tr><td><code>ansible ... -m ping</code></td><td>Checks whether Ansible can connect to the target over SSH and run a basic module</td></tr>
+  <tr><td><code>ansible-playbook ...</code></td><td>Runs the SSH-based playbook against the Docker Linux target</td></tr>
+  <tr><td><code>docker compose down</code></td><td>Stops and removes the local SSH target container</td></tr>
+</table>
+
+<div class="tip">
+  <strong>Why Python matters:</strong> Most normal Ansible modules run Python on
+  the target machine. This lab's Docker image installs <code>python3</code> during
+  the build so the happy path works without extra setup.
+</div>
+
+<div class="warn">
+  <strong>Troubleshooting <code>/usr/bin/python3: not found</code>:</strong> That
+  error means the target machine does not have Python at the path Ansible expects.
+  In this lab, rebuild the image with <code>docker compose up -d --build</code>.
+  On a different Linux target, install Python there or update
+  <code>ansible_python_interpreter</code> in the inventory.
+</div>
+
+<h2 id="glossary">Glossary</h2>
+
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td class="glossary-term">Alembic</td><td>Database migration tool for SQLAlchemy. Lets you version-control your database schema.</td></tr>
+  <tr><td class="glossary-term">Alertmanager</td><td>Prometheus component that routes alerts to Slack, email, PagerDuty, etc.</td></tr>
+  <tr><td class="glossary-term">ArgoCD</td><td>GitOps tool that syncs Kubernetes cluster state to a Git repository.</td></tr>
+  <tr><td class="glossary-term">Chart</td><td>A Helm package containing templates, values, and metadata for deploying an application.</td></tr>
+  <tr><td class="glossary-term">Distributed Tracing</td><td>Tracking a request as it flows through multiple services. Each service adds a "span" to the trace.</td></tr>
+  <tr><td class="glossary-term">GitOps</td><td>Using Git as the single source of truth for infrastructure and application configuration.</td></tr>
+  <tr><td class="glossary-term">Gunicorn</td><td>WSGI HTTP server for Python web applications. Handles multiple requests concurrently with worker processes.</td></tr>
+  <tr><td class="glossary-term">Helm</td><td>Kubernetes package manager. Charts define, install, and upgrade applications.</td></tr>
+  <tr><td class="glossary-term">LogQL</td><td>Loki's query language for filtering and aggregating log data.</td></tr>
+  <tr><td class="glossary-term">Loki</td><td>Log aggregation system from Grafana Labs. Indexes labels, not log content.</td></tr>
+  <tr><td class="glossary-term">Network Policy</td><td>Kubernetes resource that controls pod-to-pod communication using labels and selectors.</td></tr>
+  <tr><td class="glossary-term">OpenTelemetry</td><td>Vendor-neutral API and SDK for generating, collecting, and exporting telemetry data (traces, metrics, logs).</td></tr>
+  <tr><td class="glossary-term">Promtail</td><td>Agent that collects logs and forwards them to Loki.</td></tr>
+  <tr><td class="glossary-term">PromQL</td><td>Prometheus query language for selecting and aggregating time series data.</td></tr>
+  <tr><td class="glossary-term">Rolling Update</td><td>Kubernetes deployment strategy that replaces pods gradually to avoid downtime.</td></tr>
+  <tr><td class="glossary-term">SARIF</td><td>Static Analysis Results Interchange Format. Standard format for security scanning results.</td></tr>
+  <tr><td class="glossary-term">Span</td><td>A named, timed operation in a distributed trace (e.g., a database query or HTTP request).</td></tr>
+  <tr><td class="glossary-term">Synthetic Monitoring</td><td>Running scripted tests against production endpoints from external locations.</td></tr>
+  <tr><td class="glossary-term">Tempo</td><td>Distributed tracing backend from Grafana Labs. Works with OpenTelemetry data.</td></tr>
+  <tr><td class="glossary-term">Trace</td><td>A tree of spans representing a complete request through one or more services.</td></tr>
+  <tr><td class="glossary-term">Trivy</td><td>Open-source vulnerability scanner for containers, filesystems, and Git repositories.</td></tr>
+  <tr><td class="glossary-term">WSGI</td><td>Web Server Gateway Interface. Python standard for connecting web servers to applications.</td></tr>
+</table>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<p>You have built a significantly more sophisticated DevOps portfolio. Here is what to do next:</p>
+
+<h3>Make It Your Own</h3>
+<ul>
+  <li>Replace the Todo API with a domain that interests you (a URL shortener, blog CMS, or weather service)</li>
+  <li>Add authentication with JWT and Keycloak</li>
+  <li>Write a Helm chart for the monitoring stack itself (kube-prometheus-stack is the community standard)</li>
+  <li>Add a service mesh like Istio or Linkerd for mTLS and traffic splitting</li>
+</ul>
+
+<h3>Production Hardening</h3>
+<ul>
+  <li>Integrate OPA/Gatekeeper or Kyverno for policy-as-code</li>
+  <li>Set up External Secrets Operator to pull database passwords from AWS Secrets Manager</li>
+  <li>Add K6 performance tests to CI and enforce latency SLIs</li>
+  <li>Configure Pod Security Standards (restricted profile) and Seccomp profiles</li>
+  <li>Implement a disaster recovery runbook with Velero for cluster backups</li>
+</ul>
+
+<h3>Interview Talking Points</h3>
+<ul>
+  <li>"I replaced a static Nginx site with a Flask API and PostgreSQL to demonstrate how DevOps patterns change when your app has state."</li>
+  <li>"I migrated from plain Kubernetes manifests to Helm charts with environment overlays, reducing deploy boilerplate from 15 kubectl commands to one helm command."</li>
+  <li>"I implemented GitOps with ArgoCD so that all infrastructure changes go through pull requests — no direct cluster access needed."</li>
+  <li>"I added distributed tracing with OpenTelemetry and Tempo, which helped me identify a database connection pooling bottleneck during load testing."</li>
+  <li>"I integrated Trivy into CI to catch CVEs before deployment, reducing our vulnerability exposure window from days to minutes."</li>
+</ul>
+
+<p style="margin-top: 48px; color: var(--text2); text-align: center; border-top: 1px solid var(--border); padding-top: 24px;">
+  End of Volume 2. The full source is at <code>github.com/yourorg/devops-portfolio2</code>.
+</p>
+
+</main>
+
+<script>
+const navLinks = document.querySelectorAll("nav a");
+const sections = [];
+navLinks.forEach(a => {
+  const href = a.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const el = document.getElementById(href.slice(1));
+    if (el) sections.push({ el, a });
+  }
+});
+
+function onScroll() {
+  let current = sections[0];
+  for (const s of sections) {
+    if (s.el.getBoundingClientRect().top <= 100) current = s;
+  }
+  navLinks.forEach(a => a.classList.remove("active"));
+  if (current) current.a.classList.add("active");
+}
+
+window.addEventListener("scroll", onScroll);
+onScroll();
+</script>
+
+</body>
+</html>

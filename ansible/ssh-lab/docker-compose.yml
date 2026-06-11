@@ -1,0 +1,7 @@
+---
+services:
+  ssh-target:
+    build: .
+    container_name: ansible-ssh-target
+    ports:
+      - "2222:22"

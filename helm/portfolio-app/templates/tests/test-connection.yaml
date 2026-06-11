@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "portfolio-app.fullname" . }}-test-connection"
+  labels:
+    {{- include "portfolio-app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: curlimages/curl:latest
+      command: ["curl", "-sf", "http://{{ include "portfolio-app.fullname" . }}:{{ .Values.service.port }}/health"]
+  restartPolicy: Never

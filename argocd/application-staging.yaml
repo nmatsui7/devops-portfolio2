@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: portfolio-staging
+  namespace: argocd
+spec:
+  project: portfolio
+  source:
+    repoURL: https://github.com/yourorg/devops-portfolio2.git
+    targetRevision: main
+    path: helm/portfolio-app
+    helm:
+      valueFiles:
+        - values-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

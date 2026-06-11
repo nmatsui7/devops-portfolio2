@@ -1,0 +1,56 @@
+{
+  "title": "App Overview",
+  "uid": "app-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "rate(app_requests_total[5m])",
+          "legendFormat": "{{method}} {{endpoint}}"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "title": "P95 Latency",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(app_request_latency_seconds_bucket[5m]))",
+          "legendFormat": "{{method}} {{endpoint}}"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "title": "Error Rate",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "rate(app_requests_total{status=~\"5..\"}[5m]) / rate(app_requests_total[5m])",
+          "legendFormat": "error ratio"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "title": "Active Requests",
+      "type": "gauge",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(app_active_requests_count)"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    }
+  ],
+  "templating": { "list": [] }
+}

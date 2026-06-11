@@ -1,0 +1,43 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "portfolio-app.fullname" . }}
+  labels:
+    {{- include "portfolio-app.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "portfolio-app.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    {{- range .Values.networkPolicy.ingressFrom }}
+    - from:
+        {{- if .namespaceSelector }}
+        - namespaceSelector:
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+        {{- end }}
+        {{- if .podSelector }}
+        - podSelector:
+            matchLabels:
+              {{- toYaml .podSelector.matchLabels | nindent 14 }}
+        {{- end }}
+    {{- end }}
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 5432
+          protocol: TCP
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 80
+          protocol: TCP
+{{- end }}

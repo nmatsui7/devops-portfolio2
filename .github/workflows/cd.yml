@@ -1,0 +1,92 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/portfolio-app
+  AWS_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+      - name: Build and push image (from solutions)
+        run: |
+          docker build -t $IMAGE_NAME:${{ steps.tag.outputs.tag }} -f solutions/app/Dockerfile solutions/app/
+          docker tag $IMAGE_NAME:${{ steps.tag.outputs.tag }} $IMAGE_NAME:latest
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push $IMAGE_NAME:${{ steps.tag.outputs.tag }}
+          docker push $IMAGE_NAME:latest
+
+  deploy-staging:
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }}
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install portfolio-app ./helm/portfolio-app \
+            --namespace staging \
+            --values ./helm/portfolio-app/values-staging.yaml \
+            --set image.tag=${{ needs.build.outputs.tag }} \
+            --set config.database.password=${{ secrets.DB_PASSWORD }} \
+            --wait --timeout 5m
+      - name: Run smoke tests
+        run: |
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=portfolio-app -n staging --timeout=60s
+          kubectl run smoke-test --image=curlimages/curl:latest \
+            --namespace staging --restart=Never \
+            -- curl -sf http://portfolio-app/health
+          kubectl logs smoke-test -n staging
+          kubectl delete pod smoke-test -n staging
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          helm rollback portfolio-app -n staging
+          echo "Rolled back staging deployment"
+
+  deploy-production:
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }}
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install portfolio-app ./helm/portfolio-app \
+            --namespace production \
+            --values ./helm/portfolio-app/values-production.yaml \
+            --set image.tag=${{ needs.build.outputs.tag }} \
+            --set config.database.password=${{ secrets.DB_PASSWORD }} \
+            --wait --timeout 5m
+      - name: Smoke test against production URL
+        run: |
+          curl -sf ${{ vars.PRODUCTION_URL }}/health
+          curl -sf ${{ vars.PRODUCTION_URL }}/ready

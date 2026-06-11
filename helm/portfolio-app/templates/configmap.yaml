@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "portfolio-app.fullname" . }}
+  labels:
+    {{- include "portfolio-app.labels" . | nindent 4 }}
+data:
+  config.py: |
+    SQLALCHEMY_DATABASE_URI = "postgresql://{{ .Values.config.database.user }}@{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.name }}"
+    OTEL_SERVICE_NAME = "{{ .Values.env.OTEL_SERVICE_NAME }}"
+    OTEL_EXPORTER_OTLP_ENDPOINT = "{{ .Values.env.OTEL_EXPORTER_OTLP_ENDPOINT }}"

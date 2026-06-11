@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/portfolio-app
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check app/
+      - run: yamllint .
+      - run: |
+          pip install yamllint
+          yamllint helm/portfolio-app/values.yaml
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g @stoplight/spectral-cli
+      - run: spectral lint helm/portfolio-app/templates/*.yaml || true
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r app/requirements.txt
+      - run: pip install -r app/requirements.txt
+      - run: |
+          # CI runs against the solutions to validate the reference implementation
+          cp solutions/app/*.py app/
+          cp solutions/app/tests/*.py app/tests/
+          pytest app/tests/ --cov=app --cov-report=term --junitxml=test-results.xml
+      - uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: pytest
+          path: test-results.xml
+          reporter: java-junit
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "HIGH,CRITICAL"
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image (from solutions)
+        run: docker build -t $IMAGE_NAME:${{ github.sha }} -f solutions/app/Dockerfile solutions/app/
+      - name: Run Trivy on Docker image
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: $IMAGE_NAME:${{ github.sha }}
+          format: "sarif"
+          output: "trivy-image-results.sarif"
+          severity: "HIGH,CRITICAL"
+      - name: Push to GHCR
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker tag $IMAGE_NAME:${{ github.sha }} $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:latest
+
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: helm/chart-testing-action@v2.6.1
+      - run: helm lint helm/portfolio-app/
+      - run: helm template helm/portfolio-app/ --debug > /dev/null

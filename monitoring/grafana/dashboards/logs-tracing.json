@@ -1,0 +1,33 @@
+{
+  "title": "Logs & Tracing",
+  "uid": "logs-tracing",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "title": "Application Logs",
+      "type": "logs",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "{container=\"portfolio-api\"}",
+          "legendFormat": ""
+        }
+      ],
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "title": "Recent Traces",
+      "type": "traces",
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "targets": [
+        {
+          "query": "{ .service.name = \"portfolio-app\" }",
+          "queryType": "clear"
+        }
+      ],
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 12 }
+    }
+  ],
+  "templating": { "list": [] }
+}

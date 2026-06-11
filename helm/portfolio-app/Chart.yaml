@@ -1,0 +1,6 @@
+apiVersion: v2
+name: portfolio-app
+description: Helm chart for the Portfolio API application
+type: application
+version: 0.1.0
+appVersion: "2.0.0"

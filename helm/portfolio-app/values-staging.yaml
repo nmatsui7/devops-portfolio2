@@ -1,0 +1,24 @@
+replicaCount: 2
+
+ingress:
+  hosts:
+    - host: api-staging.portfolio.example.com
+  tls:
+    - secretName: portfolio-app-tls-staging
+      hosts:
+        - api-staging.portfolio.example.com
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 5
+
+resources:
+  limits:
+    cpu: 256m
+    memory: 512Mi
+  requests:
+    cpu: 128m
+    memory: 256Mi
+
+pdb:
+  minAvailable: 1

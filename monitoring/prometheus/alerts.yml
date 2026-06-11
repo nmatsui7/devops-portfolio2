@@ -1,0 +1,34 @@
+groups:
+  - name: portfolio
+    rules:
+      - alert: PortfolioAppDown
+        expr: up{job="portfolio-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Portfolio app is down"
+
+      - alert: PortfolioAppNotReady
+        expr: probe_success{job="portfolio-app"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Portfolio app is not ready"
+
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, rate(app_request_latency_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency detected"
+
+      - alert: HighErrorRate
+        expr: rate(app_requests_total{status=~"5.."}[5m]) / rate(app_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error rate above 5%"
