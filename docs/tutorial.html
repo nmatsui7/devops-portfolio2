@@ -178,6 +178,7 @@
   <a href="#intro">Introduction</a>
   <a href="#who" class="h2">Who This Is For</a>
   <a href="#prereqs" class="h2">Prerequisites</a>
+  <a href="#toolbox-container" class="h2">Optional Toolbox Container</a>
   <a href="#workflow" class="h2">Exercise Workflow</a>
   <a href="#flask-app">1. Write the Flask API</a>
   <a href="#exercise-config" class="h2">config.py</a>
@@ -207,6 +208,7 @@
   <a href="#trivy" class="h2">Trivy Scanning</a>
   <a href="#synthetic-monitoring">8. Synthetic Monitoring</a>
   <a href="#local-lab">9. Local Lab Walkthrough</a>
+  <a href="#kubernetes-confidence" class="h2">Kubernetes Confidence Checkpoint</a>
   <a href="#ansible-ssh">10. Ansible over SSH</a>
   <a href="#glossary">Glossary</a>
   <a href="#next-steps">Next Steps</a>
@@ -217,7 +219,7 @@
 <h2 id="intro">Introduction</h2>
 
 <div class="warn">
-  <strong>This is Volume 2.</strong> It assumes you have completed <a href="https://github.com/yourorg/devops-portfolio">Volume 1</a> or already know Docker, Docker Compose, Kubernetes basics (Deployments, Services, Ingress), Terraform, GitHub Actions, Prometheus/Grafana, and Ansible. If any of those terms are unfamiliar, start with Volume 1 first.
+  <strong>This is Volume 2.</strong> It assumes you have completed <a href="https://github.com/nmatsui7/devops-portfolio">Volume 1</a> or already know Docker, Docker Compose, Kubernetes basics (Deployments, Services, Ingress), Terraform, GitHub Actions, Prometheus/Grafana, and Ansible. If any of those terms are unfamiliar, start with Volume 1 first.
 </div>
 
 <p>
@@ -262,6 +264,64 @@
   <tr><td>argocd</td><td>2.10+</td><td>GitOps CLI (optional)</td></tr>
   <tr><td>Python</td><td>3.12+</td><td>Flask API runtime</td></tr>
   <tr><td>curl</td><td>any</td><td>Smoke tests</td></tr>
+</table>
+
+<h3 id="toolbox-container">Optional: Linux DevOps Toolbox Container</h3>
+
+<p>
+  If your local machine has trouble installing every CLI tool directly, you can
+  use the toolbox container. It gives you a consistent Linux terminal with common
+  DevOps tools already installed.
+</p>
+
+<div class="warn">
+  <strong>What this does not do:</strong> The toolbox container does not replace
+  Docker Desktop, Minikube, Kind, or a real Kubernetes cluster. It only gives you
+  a Linux command-line environment for running tools such as <code>kubectl</code>,
+  <code>helm</code>, <code>argocd</code>, <code>trivy</code>, and <code>k6</code>.
+</div>
+
+<p>Build and start the toolbox from the project root:</p>
+
+<pre><code># Build the toolbox image
+docker build -t devops-toolbox:volume2 -f docker/devops-toolbox.Dockerfile .
+
+# Start the toolbox shell
+./scripts/toolbox.sh
+
+# Inside the toolbox
+kubectl version --client
+helm version
+argocd version --client
+trivy --version
+k6 version</code></pre>
+
+<p>
+  Before using <code>kubectl</code> inside the toolbox, start your Kubernetes
+  cluster on the host first. For example, start Minikube or Kind from your normal
+  terminal, confirm <code>kubectl get nodes</code> works, then open the toolbox.
+</p>
+
+<div class="info">
+  <strong>Kubeconfig mount:</strong> The helper script mounts <code>$HOME/.kube</code>
+  into the toolbox as read-only when it exists, so <code>kubectl</code> can reuse
+  your host Kubernetes context.
+</div>
+
+<div class="warn">
+  <strong>Docker socket security:</strong> The toolbox does not mount
+  <code>/var/run/docker.sock</code> by default. If you explicitly start it with
+  <code>./scripts/toolbox.sh --with-docker-socket</code>, processes inside the
+  toolbox can control the host Docker daemon. Use that option only when you
+  understand and accept the security risk.
+</div>
+
+<table>
+  <tr><th>Problem</th><th>Fix</th></tr>
+  <tr><td><code>kubectl</code> cannot connect</td><td>Start Minikube or Kind on the host first, confirm <code>kubectl get nodes</code> works on the host, and check that <code>$HOME/.kube</code> is mounted into the toolbox.</td></tr>
+  <tr><td><code>permission denied</code> on <code>toolbox.sh</code></td><td>Run <code>chmod +x scripts/toolbox.sh</code>.</td></tr>
+  <tr><td>Docker socket not available</td><td>Run Docker commands on the host, not inside the toolbox, or start the toolbox with <code>--with-docker-socket</code> after reviewing the security warning.</td></tr>
+  <tr><td>Windows path issue</td><td>Use WSL2, or run the script from Git Bash or WSL so path mounts are translated correctly.</td></tr>
 </table>
 
 <div class="tip">
@@ -1285,7 +1345,7 @@ def test_get_todo_not_found(client):
   steps:
     - uses: actions/checkout@v4
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.24.0
+      uses: aquasecurity/trivy-action@v0.35.0
       with:
         scan-type: "fs"
         scan-ref: "."
@@ -1299,6 +1359,14 @@ def test_get_todo_not_found(client):
 
 <div class="info">
   <strong>What Trivy finds:</strong> Known CVEs in OS packages (apt, apk), language-specific packages (pip, npm), and misconfigurations in IaC files (Dockerfile, Kubernetes YAML). Results appear in the GitHub Security tab under "Code scanning alerts."
+</div>
+
+<div class="info">
+  <strong>Trivy Action version:</strong> Use a valid Trivy Action release tag
+  with the <code>v</code> prefix. This tutorial pins
+  <code>aquasecurity/trivy-action@v0.35.0</code>. If GitHub Actions cannot
+  resolve the action version, check the Trivy Action releases page and update
+  the tag.
 </div>
 
 <h3 id="cd-helm">Helm Deploy</h3>
@@ -1612,6 +1680,66 @@ pytest app/tests/ --cov=app --cov-report=term -v</code></pre>
   <p>Lint the Helm chart:</p>
   <pre><code>helm lint helm/portfolio-app/
 helm template helm/portfolio-app/ --debug > /dev/null</code></pre>
+</div>
+
+<h3 id="kubernetes-confidence">Kubernetes Confidence Checkpoint</h3>
+
+<p>
+  The Docker Compose lab proves the application works on one machine. This checkpoint proves a more important DevOps skill: you can run the API inside a Linux-based Kubernetes cluster, connect it to PostgreSQL, expose it through a Service, and verify the app from outside the cluster.
+</p>
+
+<div class="info">
+  <strong>Before you start:</strong> This Helm chart expects PostgreSQL to be reachable at <code>portfolio-db:5432</code> by default. In a local cluster, create a PostgreSQL service first or override the database settings with <code>--set config.database.host=...</code>, <code>--set config.database.user=...</code>, <code>--set config.database.password=...</code>, and <code>--set config.database.name=...</code>.
+</div>
+
+<div class="step-box">
+  <p>Build the application image and make it available to your local cluster:</p>
+  <pre><code>docker build -t portfolio-app:local app/
+
+# If you use kind:
+kind load docker-image portfolio-app:local
+
+# If you use minikube:
+minikube image load portfolio-app:local</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Deploy the API into a local Kubernetes namespace:</p>
+  <pre><code>kubectl create namespace portfolio --dry-run=client -o yaml | kubectl apply -f -
+
+helm upgrade --install portfolio-app ./helm/portfolio-app \
+  --namespace portfolio \
+  --set replicaCount=1 \
+  --set autoscaling.enabled=false \
+  --set ingress.enabled=false \
+  --set image.repository=portfolio-app \
+  --set image.tag=local \
+  --set image.pullPolicy=IfNotPresent</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Prove the workload and Service exist:</p>
+  <pre><code>kubectl get pods -n portfolio
+kubectl get svc -n portfolio</code></pre>
+</div>
+
+<div class="step-box">
+  <p>Forward the Kubernetes Service to your workstation:</p>
+  <pre><code>kubectl port-forward svc/portfolio-app 18080:80 -n portfolio</code></pre>
+</div>
+
+<div class="step-box">
+  <p>In a second terminal, prove health, readiness, and database-backed CRUD:</p>
+  <pre><code>curl -sf http://127.0.0.1:18080/health
+curl -sf http://127.0.0.1:18080/ready
+curl -X POST http://127.0.0.1:18080/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Kubernetes confidence checkpoint"}'
+curl -sf http://127.0.0.1:18080/api/todos</code></pre>
+</div>
+
+<div class="tip">
+  <strong>Confidence checkpoint:</strong> If you can get the API pod running in your local Linux-based Kubernetes cluster, connect it to PostgreSQL, call <code>/health</code>, call <code>/ready</code>, create a todo through <code>/api/todos</code>, and see the pod stay healthy, you have crossed an important DevOps threshold. You are no longer only reading YAML files - you are operating an application inside a cluster.
 </div>
 
 <div class="step-box">

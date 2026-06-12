@@ -1,6 +1,6 @@
 # Intermediate DevOps Portfolio Tutorial — Volume 2
 
-This repository is the sequel to the [Beginner DevOps Operations Tutorial](https://github.com/example/devops-portfolio). It builds on the same containerized app foundation but replaces the static Nginx site with a real Python API, introduces Helm packaging, GitOps with ArgoCD, advanced CI/CD with security scanning, and a complete observability stack including logs and distributed tracing.
+This repository is the sequel to the [Beginner DevOps Operations Tutorial](https://github.com/nmatsui7/devops-portfolio). It builds on the same containerized app foundation but replaces the static Nginx site with a real Python API, introduces Helm packaging, GitOps with ArgoCD, advanced CI/CD with security scanning, and a complete observability stack including logs and distributed tracing.
 
 **You should complete Volume 1 or already know Docker, Docker Compose, basic Kubernetes, Terraform, GitHub Actions, Prometheus/Grafana, and Ansible before starting here.**
 
@@ -25,6 +25,27 @@ app/               Your workspace — stub files with TODO markers
 solutions/app/     Complete reference implementation
 docker/            Docker Compose files (exercise + solution modes)
 ```
+
+## Optional Linux DevOps Toolbox
+
+If your local machine has trouble installing every CLI tool directly, build the
+toolbox image and use it as a consistent Linux terminal for the later exercises:
+
+```bash
+docker build -t devops-toolbox:volume2 -f docker/devops-toolbox.Dockerfile .
+./scripts/toolbox.sh
+```
+
+The toolbox includes common DevOps CLIs such as `kubectl`, `helm`, `argocd`,
+`trivy`, `k6`, `jq`, `yq`, `yamllint`, `shellcheck`, `ansible`, and
+`ansible-lint`. It does not run Kubernetes by itself; start Docker Desktop,
+Minikube, Kind, or your real cluster on the host first.
+
+By default, `scripts/toolbox.sh` mounts this repo into `/workspace` and mounts
+`$HOME/.kube` read-only when available. Docker socket access is intentionally
+off by default. Use `./scripts/toolbox.sh --with-docker-socket` only if you
+understand that mounting `/var/run/docker.sock` lets the container control the
+host Docker daemon.
 
 ## Exercise Workflow
 
