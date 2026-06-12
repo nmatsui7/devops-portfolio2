@@ -87,28 +87,12 @@ curl http://localhost:8000/metrics
 curl http://localhost:8000/api/todos
 ```
 
-## Optional Ansible SSH Lab
+## Ansible Prerequisite
 
-The `ansible/ssh-lab/` exercise starts three local Ubuntu SSH target containers
-to simulate three similar Linux servers. One Ansible inventory group and one
-playbook configures all three as small nginx web servers.
-
-```bash
-cd ansible/ssh-lab
-docker compose up -d --build
-ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory.ini workers -m ping
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini docker-ssh-playbook.yml
-docker compose ps
-for port in 8081 8082 8083; do
-  echo "Checking http://localhost:$port"
-  curl -s http://localhost:$port | grep "managed by Ansible"
-done
-docker compose down
-```
-
-Expected successful hosts: `worker1`, `worker2`, and `worker3`.
-`docker compose ps` confirms the containers are running, and the loop checks
-each nginx server through its mapped localhost port.
+Volume 1 includes a local Ansible SSH lab where one playbook configures three
+Docker-based Ubuntu targets as nginx web servers. Volume 2 assumes you already
+understand inventory files, SSH targets, facts, templates, and basic playbook
+execution.
 
 ## Local Services
 
