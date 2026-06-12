@@ -1,7 +1,9 @@
 FROM ubuntu:24.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openssh-server sudo python3 && \
+    apt-get install -y --no-install-recommends openssh-server sudo python3 curl nginx && \
     useradd -m -s /bin/bash ansible && \
     echo 'ansible:ansible123' | chpasswd && \
     usermod -aG sudo ansible && \

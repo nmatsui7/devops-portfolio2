@@ -1763,15 +1763,30 @@ terraform plan -var="environment=staging"</code></pre>
 <p>
   Volume 1 introduced Ansible with localhost and a small optional SSH practice
   lab. This Volume 2 lab makes the remote-server model more explicit: Docker
-  runs an Ubuntu Linux container with SSH and Python installed, and Ansible
-  connects to it as if it were a remote host.
+  runs three Ubuntu Linux containers with SSH and Python installed, and Ansible
+  connects to them as if they were remote hosts.
+</p>
+
+<p>
+  In real operations work, you often manage several similar servers. You do not
+  want to SSH into each one manually and repeat the same commands. Ansible lets
+  you describe the desired configuration once, then apply it to every host in an
+  inventory group.
+</p>
+
+<p>
+  The ping command is only a pre-flight check. It proves Ansible can connect to
+  every target over SSH and run Python. The playbook is the real exercise: it
+  turns three plain Linux containers into three small web servers. Each server
+  receives the same base configuration, but the generated page includes
+  host-specific facts so you can see that Ansible configured each target
+  separately.
 </p>
 
 <div class="warn">
   <strong>Local-only safety note:</strong> This lab is for learning Ansible SSH
-  mechanics only. Do not expose this SSH container to the internet, and do not
-  reuse the password <code>ansible123</code>. AWS and EC2 remote hosts are
-  optional later; they are not required for this Docker SSH lab.
+  mechanics only. Do not expose these SSH containers to the internet, and do not
+  reuse the password <code>ansible123</code>.
 </div>
 
 <p>
@@ -1780,11 +1795,35 @@ terraform plan -var="environment=staging"</code></pre>
 
 <table>
   <tr><th>File</th><th>Purpose</th></tr>
-  <tr><td><code>Dockerfile</code></td><td>Builds a small Ubuntu SSH target with <code>python3</code>, <code>sudo</code>, and an <code>ansible</code> user</td></tr>
-  <tr><td><code>docker-compose.yml</code></td><td>Runs the SSH target on <code>localhost:2222</code></td></tr>
-  <tr><td><code>inventory.ini</code></td><td>Tells Ansible how to connect to the Docker SSH target</td></tr>
-  <tr><td><code>docker-ssh-playbook.yml</code></td><td>Runs simple tasks over SSH and creates a practice file inside the container</td></tr>
+  <tr><td><code>Dockerfile</code></td><td>Builds one reusable Ubuntu SSH target image with <code>python3</code>, <code>sudo</code>, <code>curl</code>, <code>nginx</code>, and an <code>ansible</code> user</td></tr>
+  <tr><td><code>docker-compose.yml</code></td><td>Runs three similar SSH targets: <code>worker1</code> on SSH <code>2222</code> and HTTP <code>8081</code>, <code>worker2</code> on SSH <code>2223</code> and HTTP <code>8082</code>, and <code>worker3</code> on SSH <code>2224</code> and HTTP <code>8083</code></td></tr>
+  <tr><td><code>inventory.ini</code></td><td>Tells Ansible where each worker is and groups them under <code>[workers]</code></td></tr>
+  <tr><td><code>docker-ssh-playbook.yml</code></td><td>Runs one playbook against every worker, installs nginx, deploys a host-specific web page from a template, starts nginx without systemd, and verifies the page with <code>curl</code></td></tr>
+  <tr><td><code>templates/index.html.j2</code></td><td>Defines the generated nginx page using Jinja2 variables</td></tr>
 </table>
+
+<pre><code>ssh-lab/
+  Dockerfile
+  docker-compose.yml
+  inventory.ini
+  docker-ssh-playbook.yml
+  templates/
+    index.html.j2</code></pre>
+
+<p>
+  The playbook describes the actions Ansible should perform. The template
+  describes what the generated file should look like. Ansible fills in the
+  Jinja2 variables separately for each worker, so the same template produces a
+  slightly different page on <code>worker1</code>, <code>worker2</code>, and
+  <code>worker3</code>.
+</p>
+
+<p>
+  The <code>ansible.builtin.template</code> module is more realistic than inline
+  <code>copy</code> for generated config files. Real teams use templates for
+  nginx config, app config files, environment files, systemd unit files, and
+  generated status pages.
+</p>
 
 <pre><code>cd ansible/ssh-lab
 
@@ -1794,15 +1833,56 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory.ini workers -m ping
 
 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini docker-ssh-playbook.yml
 
+docker compose ps
+
+for port in 8081 8082 8083; do
+  echo "Checking http://localhost:$port"
+  curl -s http://localhost:$port | grep "managed by Ansible"
+done
+
 docker compose down</code></pre>
 
 <table>
   <tr><th>Command</th><th>What it does</th></tr>
-  <tr><td><code>docker compose up -d --build</code></td><td>Builds and starts the SSH target container in the background</td></tr>
-  <tr><td><code>ansible ... -m ping</code></td><td>Checks whether Ansible can connect to the target over SSH and run a basic module</td></tr>
-  <tr><td><code>ansible-playbook ...</code></td><td>Runs the SSH-based playbook against the Docker Linux target</td></tr>
-  <tr><td><code>docker compose down</code></td><td>Stops and removes the local SSH target container</td></tr>
+  <tr><td><code>docker compose up -d --build</code></td><td>Builds one SSH target image and starts three worker containers in the background</td></tr>
+  <tr><td><code>ansible ... -m ping</code></td><td>Checks whether Ansible can connect to all workers over SSH and run Python</td></tr>
+  <tr><td><code>ansible-playbook ...</code></td><td>Runs the same SSH-based playbook against <code>worker1</code>, <code>worker2</code>, and <code>worker3</code>, turning each one into a small nginx web server</td></tr>
+  <tr><td><code>docker compose ps</code></td><td>Confirms that the three worker containers are running</td></tr>
+  <tr><td><code>for port in 8081 8082 8083; do ...</code></td><td>Checks each nginx server through its mapped localhost port</td></tr>
+  <tr><td><code>docker compose down</code></td><td>Stops and removes the local SSH target containers</td></tr>
 </table>
+
+<p>
+  First, <code>docker compose ps</code> confirms that the three worker containers
+  are running. Then the loop checks each nginx server through its mapped localhost
+  port.
+</p>
+
+<p>
+  In the ping and playbook output, look for successful results from
+  <code>worker1</code>, <code>worker2</code>, and <code>worker3</code>. That is
+  the key lesson: the playbook is written once, and Ansible applies it
+  consistently to every host in the inventory group.
+</p>
+
+<p>
+  Each worker's verification output should include its own generated page text:
+  <code>worker1 is managed by Ansible</code>,
+  <code>worker2 is managed by Ansible</code>, and
+  <code>worker3 is managed by Ansible</code>.
+</p>
+
+<pre><code>NAME              STATUS
+ansible-worker1   Up
+ansible-worker2   Up
+ansible-worker3   Up
+
+Checking http://localhost:8081
+            &lt;h1&gt;worker1 is managed by Ansible&lt;/h1&gt;
+Checking http://localhost:8082
+            &lt;h1&gt;worker2 is managed by Ansible&lt;/h1&gt;
+Checking http://localhost:8083
+            &lt;h1&gt;worker3 is managed by Ansible&lt;/h1&gt;</code></pre>
 
 <div class="tip">
   <strong>Why Python matters:</strong> Most normal Ansible modules run Python on

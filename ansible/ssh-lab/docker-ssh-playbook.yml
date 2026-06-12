@@ -1,37 +1,43 @@
 ---
-- name: Practice Ansible over SSH with a Docker Linux target
+- name: Configure Docker SSH workers as small web servers
   hosts: workers
+  become: true
   gather_facts: true
 
   tasks:
-    - name: Show remote hostname
-      ansible.builtin.command: hostname
-      changed_when: false
-      register: hostname_result
-
-    - name: Print hostname
+    - name: Show which host Ansible is configuring
       ansible.builtin.debug:
-        var: hostname_result.stdout
+        msg: "Configuring {{ inventory_hostname }} running {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
 
-    - name: Create a practice directory
-      ansible.builtin.file:
-        path: /home/ansible/ansible-practice
-        state: directory
-        mode: "0755"
+    - name: Install nginx and curl
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - curl
+        state: present
+        update_cache: true
 
-    - name: Create a practice file over SSH
-      ansible.builtin.copy:
-        dest: /home/ansible/ansible-practice/hello.txt
-        content: |
-          Hello from Ansible.
-          This file was created over SSH inside a Docker Linux container.
+    - name: Deploy custom nginx page from template
+      ansible.builtin.template:
+        src: templates/index.html.j2
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
         mode: "0644"
 
-    - name: Read the practice file
-      ansible.builtin.command: cat /home/ansible/ansible-practice/hello.txt
-      changed_when: false
-      register: file_result
+    - name: Start nginx inside the container
+      ansible.builtin.command: nginx
+      register: nginx_start
+      failed_when:
+        - nginx_start.rc != 0
+        - "'bind()' not in nginx_start.stderr"
+      changed_when: nginx_start.rc == 0
 
-    - name: Print file contents
+    - name: Verify the local web page from inside each target
+      ansible.builtin.command: curl -s http://localhost
+      changed_when: false
+      register: web_check
+
+    - name: Show verification output
       ansible.builtin.debug:
-        var: file_result.stdout
+        msg: "{{ web_check.stdout_lines }}"

@@ -1,7 +1,25 @@
 ---
 services:
-  ssh-target:
+  worker1:
     build: .
-    container_name: ansible-ssh-target
+    container_name: ansible-worker1
     ports:
       - "2222:22"
+      - "8081:80"
+      - "8081:80"
+
+  worker2:
+    build: .
+    container_name: ansible-worker2
+    ports:
+      - "2223:22"
+      - "8082:80"
+      - "8082:80"
+
+  worker3:
+    build: .
+    container_name: ansible-worker3
+    ports:
+      - "2224:22"
+      - "8083:80"
+      - "8083:80"
