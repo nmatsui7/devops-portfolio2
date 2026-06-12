@@ -9,11 +9,13 @@ on:
 # Needed so Trivy SARIF results can be uploaded to GitHub Code Scanning.
 permissions:
   contents: read
+  packages: write
   actions: read
   security-events: write
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/portfolio-app
+  REGISTRY: ghcr.io
+  IMAGE_NAME: nmatsui7/portfolio-app
 
 jobs:
   lint:
@@ -25,10 +27,21 @@ jobs:
           python-version: "3.12"
       - run: pip install ruff
       - run: ruff check app/
-      - run: yamllint .
-      - run: |
+      - name: Lint YAML files
+        run: |
           pip install yamllint
-          yamllint helm/portfolio-app/values.yaml
+          yamllint .github docker infrastructure monitoring argocd ansible
+          yamllint \
+            helm/portfolio-app/Chart.yaml \
+            helm/portfolio-app/values.yaml \
+            helm/portfolio-app/values-staging.yaml \
+            helm/portfolio-app/values-production.yaml
+      - uses: azure/setup-helm@v4
+      - name: Validate Helm chart
+        run: |
+          helm lint helm/portfolio-app
+          helm template portfolio-app helm/portfolio-app --values helm/portfolio-app/values.yaml > /tmp/portfolio-app-rendered.yaml
+          yamllint /tmp/portfolio-app-rendered.yaml
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -81,21 +94,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker image (from solutions)
-        run: docker build -t $IMAGE_NAME:${{ github.sha }} -f solutions/app/Dockerfile solutions/app/
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -f solutions/app/Dockerfile solutions/app/
       - name: Run Trivy on Docker image
         uses: aquasecurity/trivy-action@v0.35.0
         with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: "sarif"
           output: "trivy-image-results.sarif"
           severity: "HIGH,CRITICAL"
-      - name: Push to GHCR
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker tag $IMAGE_NAME:${{ github.sha }} $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:${{ github.sha }}
-          docker push $IMAGE_NAME:latest
+      - name: Login to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   helm-lint:
     runs-on: ubuntu-latest

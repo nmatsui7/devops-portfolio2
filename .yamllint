@@ -2,6 +2,8 @@ extends: default
 rules:
   line-length:
     max: 180
+  empty-lines:
+    max-end: 1
   truthy:
     allowed-values: ['true', 'false', 'yes', 'no']
   octal-values:

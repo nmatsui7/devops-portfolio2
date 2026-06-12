@@ -1678,8 +1678,16 @@ pytest app/tests/ --cov=app --cov-report=term -v</code></pre>
 
 <div class="step-box">
   <p>Lint the Helm chart:</p>
-  <pre><code>helm lint helm/portfolio-app/
-helm template helm/portfolio-app/ --debug > /dev/null</code></pre>
+  <pre><code>helm lint helm/portfolio-app
+helm template portfolio-app helm/portfolio-app --values helm/portfolio-app/values.yaml > /tmp/portfolio-app-rendered.yaml
+yamllint /tmp/portfolio-app-rendered.yaml</code></pre>
+</div>
+
+<div class="warning">
+  <strong>Helm templates are not plain YAML:</strong>
+  Do not run <code>yamllint</code> directly on files under
+  <code>helm/portfolio-app/templates/</code>. Render the chart first with
+  <code>helm template</code>, then lint the rendered output.
 </div>
 
 <h3 id="kubernetes-confidence">Kubernetes Confidence Checkpoint</h3>
