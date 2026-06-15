@@ -178,7 +178,7 @@
   <a href="#intro">Introduction</a>
   <a href="#who" class="h2">Who This Is For</a>
   <a href="#prereqs" class="h2">Prerequisites</a>
-  <a href="#toolbox-container" class="h2">Optional Toolbox Container</a>
+  <a href="#toolbox-container" class="h2">Option A: Toolbox Container</a>
   <a href="#workflow" class="h2">Exercise Workflow</a>
   <a href="#flask-app">1. Write the Flask API</a>
   <a href="#exercise-config" class="h2">config.py</a>
@@ -254,26 +254,36 @@
 
 <h3 id="prereqs">Prerequisites</h3>
 
-<p>All the tools from Volume 1, plus a few additions:</p>
+<p>
+  Volume 2 needs a few host-level tools no matter which setup path you choose.
+  After that, pick one CLI path: the toolbox container or native installation.
+</p>
+
+<h4>Required Host Tools</h4>
 
 <table>
-  <tr><th>Tool</th><th>Minimum Version</th><th>Purpose</th></tr>
-  <tr><td>Docker Desktop</td><td>24+</td><td>Containers and Compose</td></tr>
-  <tr><td>kubectl</td><td>1.29+</td><td>Kubernetes CLI</td></tr>
-  <tr><td>helm</td><td>3.14+</td><td>Kubernetes package manager</td></tr>
-  <tr><td>argocd</td><td>2.10+</td><td>GitOps CLI (optional)</td></tr>
-  <tr><td>trivy</td><td>0.50+</td><td>Container and filesystem vulnerability scanning</td></tr>
-  <tr><td>k6</td><td>0.49+</td><td>Load testing and API performance checks</td></tr>
-  <tr><td>Python</td><td>3.12+</td><td>Flask API runtime</td></tr>
-  <tr><td>curl</td><td>any</td><td>Smoke tests</td></tr>
+  <tr><th>Requirement</th><th>Purpose</th></tr>
+  <tr><td>Docker Desktop or Docker Engine</td><td>Runs containers and Docker Compose labs.</td></tr>
+  <tr><td>Git</td><td>Clones the repository and tracks your work.</td></tr>
+  <tr><td>A Kubernetes cluster option</td><td>Use Minikube, Kind, Docker Desktop Kubernetes, or a remote cluster.</td></tr>
+  <tr><td>WSL2 on Windows, if applicable</td><td>Provides the Linux environment that matches the tutorial commands.</td></tr>
 </table>
 
-<h3 id="toolbox-container">Optional: Linux DevOps Toolbox Container</h3>
+<div class="tip">
+  <strong>Recommendation:</strong> For most learners, use Option A. It avoids
+  OS-specific CLI installation issues while keeping Docker and Kubernetes on
+  the host.
+</div>
+
+<h4 id="toolbox-container">Option A: Use the Toolbox Container</h4>
 
 <p>
-  If your local machine has trouble installing every CLI tool directly, you can
-  use the toolbox container. It gives you a consistent Linux terminal with common
-  DevOps tools already installed.
+  Use this path if you want the simplest and most consistent setup. The toolbox
+  image gives you a Linux terminal with common DevOps CLIs already installed,
+  including <code>kubectl</code>, <code>helm</code>, <code>argocd</code>,
+  <code>trivy</code>, <code>k6</code>, <code>python3</code>, <code>curl</code>,
+  <code>ansible</code>, <code>ansible-lint</code>, <code>shellcheck</code>,
+  <code>yamllint</code>, <code>jq</code>, and <code>yq</code>.
 </p>
 
 <div class="warn">
@@ -283,31 +293,121 @@
   <code>helm</code>, <code>argocd</code>, <code>trivy</code>, and <code>k6</code>.
 </div>
 
-<p>Build and start the toolbox from the project root:</p>
+<h5>Correct Startup Order</h5>
 
-<pre><code># Build the toolbox image
-docker build -t devops-toolbox:volume2 -f docker/devops-toolbox.Dockerfile .
+<p><strong>Step 1:</strong> Start Docker Desktop or Docker Engine on the host.</p>
 
-# Start the toolbox shell
-./scripts/toolbox.sh
+<p>
+  <strong>Step 2:</strong> Pick <strong>one</strong> Kubernetes option and start
+  it on the host.
+</p>
 
-# Inside the toolbox
-kubectl version --client
+<p>Option 1: Minikube</p>
+
+<pre><code>minikube start</code></pre>
+
+<p>Option 2: Kind</p>
+
+<pre><code>kind create cluster</code></pre>
+
+<p>Option 3: Docker Desktop Kubernetes</p>
+
+<pre><code># Enable Kubernetes in Docker Desktop settings and wait until it is running.</code></pre>
+
+<p>Option 4: Remote cluster</p>
+
+<pre><code># Make sure your kubeconfig is already configured on the host.</code></pre>
+
+<p><strong>Step 3:</strong> Confirm <code>kubectl</code> works on the host:</p>
+
+<pre><code>kubectl get nodes</code></pre>
+
+<p><strong>Step 4:</strong> Build and start the toolbox:</p>
+
+<pre><code>docker build -t devops-toolbox:volume2 -f docker/devops-toolbox.Dockerfile .
+./scripts/toolbox.sh</code></pre>
+
+<p><strong>Step 5:</strong> Confirm <code>kubectl</code> works inside the toolbox:</p>
+
+<pre><code>kubectl get nodes</code></pre>
+
+<p>Inside the toolbox, you can also verify the included CLIs:</p>
+
+<pre><code>kubectl version --client
 helm version
 argocd version --client
 trivy --version
 k6 version</code></pre>
 
 <p>
-  Before using <code>kubectl</code> inside the toolbox, start your Kubernetes
-  cluster on the host first. For example, start Minikube or Kind from your normal
-  terminal, confirm <code>kubectl get nodes</code> works, then open the toolbox.
+  The toolbox gives you command-line tools, not infrastructure. It is like
+  bringing your own terminal full of DevOps tools. Docker and Kubernetes still
+  run outside the toolbox. <code>kubectl</code> inside the toolbox talks to the
+  same cluster as your host <code>kubectl</code> by reading the mounted
+  kubeconfig from your host machine.
 </p>
 
+<div class="warn">
+  <strong>Start clusters from the host:</strong> Do not run
+  <code>minikube start</code> or <code>kind create cluster</code> from inside the
+  toolbox unless the toolbox has explicit access to the host Docker daemon. By
+  default, the toolbox should not mount <code>/var/run/docker.sock</code> for
+  security reasons. Start clusters from the host terminal instead.
+</div>
+
 <div class="info">
-  <strong>Kubeconfig mount:</strong> The helper script mounts <code>$HOME/.kube</code>
-  into the toolbox as read-only when it exists, so <code>kubectl</code> can reuse
-  your host Kubernetes context.
+  <strong>No daily rebuild required:</strong> You do not need to rebuild the
+  toolbox image every day. Rebuild only when
+  <code>docker/devops-toolbox.Dockerfile</code> changes or when pinned tool
+  versions are updated. Otherwise, just run <code>./scripts/toolbox.sh</code>
+  again.
+</div>
+
+<div class="info">
+  <strong>Kubeconfig and Minikube mounts:</strong> The helper script mounts
+  <code>$HOME/.kube</code> into the toolbox as read-only so
+  <code>kubectl</code> can read your kubeconfig. If <code>$HOME/.minikube</code>
+  exists, the helper script also mounts <code>$HOME/.minikube</code> at the same
+  absolute path because Minikube kubeconfig often references certificate files
+  there. Both mounts are read-only.
+</div>
+
+<div class="warn">
+  <strong>macOS (Docker Desktop) caveat:</strong> Docker Desktop runs inside a
+  Linux VM. Inside the toolbox, <code>127.0.0.1</code> refers to that VM's
+  loopback, <em>not</em> your Mac's loopback, so the kubeconfig's
+  <code>127.0.0.1:&lt;port&gt;</code> server address does not reach the host's
+  Minikube. The helper script handles this automatically on macOS:
+  <ol>
+    <li>
+      It rewrites the kubeconfig server address from
+      <code>127.0.0.1:&lt;host-port&gt;</code> to
+      <code>minikube:8443</code> (the Minikube container's internal API-server
+      hostname and port &mdash; Minikube's TLS certificate includes
+      <code>minikube</code> in its SAN list, so TLS verification passes).
+    </li>
+    <li>
+      It connects the toolbox to the <code>minikube</code> Docker network so
+      Docker DNS resolves <code>minikube</code> to the Minikube container's IP.
+    </li>
+  </ol>
+  On Linux the script uses <code>--network=host</code> instead, which makes
+  <code>127.0.0.1</code> inside the toolbox refer to the host directly.
+</div>
+
+<div class="info">
+  <strong>Why Minikube is special:</strong> Some clusters embed certificate data
+  directly in kubeconfig or use other authentication mechanisms. Minikube
+  commonly stores client certificates, client keys, and the certificate
+  authority under <code>$HOME/.minikube</code>, so the toolbox needs read-only
+  access to that directory too.
+</div>
+
+<div class="info">
+  <strong>Editing workflow:</strong> You usually write and edit the solution
+  from outside the toolbox using your normal editor, then verify and run
+  commands inside the toolbox. This works because <code>scripts/toolbox.sh</code>
+  mounts your project directory into the toolbox at <code>/workspace</code>.
 </div>
 
 <div class="warn">
@@ -315,27 +415,88 @@ k6 version</code></pre>
   <code>/var/run/docker.sock</code> by default. If you explicitly start it with
   <code>./scripts/toolbox.sh --with-docker-socket</code>, processes inside the
   toolbox can control the host Docker daemon. Use that option only when you
-  understand and accept the security risk.
+  understand and accept the security risk. Mounting <code>$HOME/.minikube</code>
+  read-only is different from mounting the Docker socket:
+  <code>$HOME/.minikube</code> gives <code>kubectl</code> access to cluster
+  credentials, while Docker socket access gives the container control over the
+  host Docker daemon.
 </div>
+
+<h5>End-of-Day Shutdown Order</h5>
+
+<p><strong>Step 1:</strong> Exit the toolbox:</p>
+
+<pre><code>exit
+# or press Ctrl+D</code></pre>
+
+<p>
+  Because <code>scripts/toolbox.sh</code> starts the container with
+  <code>--rm</code>, Docker removes the toolbox container automatically after you
+  exit.
+</p>
+
+<p><strong>Step 2:</strong> Check whether any toolbox containers are still running:</p>
+
+<pre><code>docker ps --filter "ancestor=devops-toolbox:volume2"</code></pre>
+
+<p><strong>Step 3:</strong> Stop the Kubernetes cluster on the host if desired:</p>
+
+<pre><code># Minikube
+minikube stop
+
+# Kind
+kind delete cluster
+
+# Docker Desktop Kubernetes
+# Leave it running, or disable Kubernetes from Docker Desktop settings
+# if you want to free resources.</code></pre>
+
+<p>
+  <code>minikube stop</code> pauses the cluster so it can be resumed later.
+  <code>kind delete cluster</code> removes the local Kind cluster entirely; next
+  time, recreate it with <code>kind create cluster</code>.
+</p>
+
+<p>
+  <strong>Step 4:</strong> Leave Docker Desktop running, or quit it if you are
+  done for the day.
+</p>
 
 <table>
   <tr><th>Problem</th><th>Fix</th></tr>
-  <tr><td><code>kubectl</code> cannot connect</td><td>Start Minikube or Kind on the host first, confirm <code>kubectl get nodes</code> works on the host, and check that <code>$HOME/.kube</code> is mounted into the toolbox.</td></tr>
+  <tr><td><code>kubectl</code> cannot connect</td><td>Start Minikube or Kind on the host first, confirm <code>kubectl get nodes</code> works on the host, and check that <code>$HOME/.kube</code> is mounted into the toolbox. On macOS, the script rewrites the kubeconfig server address automatically (see the macOS caveat above).</td></tr>
+  <tr><td><code>kubectl</code> TLS error: <code>x509: certificate is valid for ... not host.docker.internal</code></td><td>This happens on macOS if the server address was rewritten to <code>host.docker.internal</code>, which Minikube's TLS certificate does not cover. Use the current version of <code>scripts/toolbox.sh</code> which rewrites to <code>minikube:8443</code> (covered by the cert) and connects the toolbox to the Minikube Docker network.</td></tr>
+  <tr><td><code>kubectl get nodes</code> inside the toolbox says it cannot read <code>/Users/&lt;name&gt;/.minikube/.../client.crt</code>, <code>client.key</code>, or <code>ca.crt</code></td><td>Exit the toolbox, make sure the updated <code>scripts/toolbox.sh</code> mounts <code>$HOME/.minikube:$HOME/.minikube:ro</code>, then restart the toolbox and rerun <code>kubectl get nodes</code>.</td></tr>
   <tr><td><code>permission denied</code> on <code>toolbox.sh</code></td><td>Run <code>chmod +x scripts/toolbox.sh</code>.</td></tr>
+  <tr><td>Toolbox build fails with <code>curl</code> exit code 22</td><td>Rebuild with <code>docker build --no-cache -t devops-toolbox:volume2 -f docker/devops-toolbox.Dockerfile .</code> and check the printed download URL immediately above the failure. The usual fix is to update the pinned version <code>ARG</code> for the failing tool.</td></tr>
   <tr><td>Docker socket not available</td><td>Run Docker commands on the host, not inside the toolbox, or start the toolbox with <code>--with-docker-socket</code> after reviewing the security warning.</td></tr>
   <tr><td>Windows path issue</td><td>Use WSL2, or run the script from Git Bash or WSL so path mounts are translated correctly.</td></tr>
 </table>
 
-<div class="tip">
-  <strong>Quick install by OS:</strong>
-  <pre><code># macOS (Homebrew)
+<h4>Option B: Install CLI Tools Natively</h4>
+
+<p>
+  Only use this path if you do not want to use the toolbox container. These
+  native install commands are redundant when you use Option A, because the
+  toolbox already includes the CLIs used later in Volume 2.
+</p>
+
+<pre><code># macOS (Homebrew)
 brew install helm argocd trivy k6 python curl
 
-# Ubuntu / Debian (apt)
-sudo apt update && sudo apt install -y helm curl python3 python3-pip
-# ArgoCD CLI:
+# Ubuntu / Debian
+sudo apt update && sudo apt install -y curl python3 python3-pip gnupg apt-transport-https
+# Helm:
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+# ArgoCD:
 curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 sudo install -m 555 argocd /usr/local/bin/argocd && rm argocd
+# Trivy:
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+# k6:
+curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt update && sudo apt install -y k6
 
 # Windows PowerShell (winget)
 winget install --id Helm.Helm -e
@@ -343,7 +504,6 @@ winget install --id Python.Python.3.12 -e
 winget install --id Argo.argocd -e
 winget install --id AquaSecurity.Trivy -e
 winget install --id GrafanaLabs.k6 -e</code></pre>
-</div>
 
 <div class="info">
   <strong>Windows recommendation:</strong> For the smoothest Volume 2 experience
@@ -381,9 +541,16 @@ k6 version</code></pre>
 </table>
 
 <div class="step-box">
-  <strong>Attempt each exercise</strong> — write your code in the <code>app/</code> files, then run the tests:
-  <pre><code>pip install -r app/requirements.txt
-pytest app/tests/ --cov=app --cov-report=term</code></pre>
+  <strong>Attempt each exercise</strong> — write your code in the <code>app/</code> files, then run the tests on the host (outside the toolbox):
+  <pre><code>pytest app/tests/ --cov=app --cov-report=term</code></pre>
+  <p>
+    Running <code>pytest</code> on the host uses the project's <code>.venv</code>
+    that you will create in <a href="#verify">1c</a> below. If you switched to
+    the toolbox for <code>kubectl</code> / <code>helm</code> work, exit it first
+    (<kbd>Ctrl+D</kbd>), then run <code>pytest</code> on the host. The toolbox
+    is ephemeral (<code>--rm</code>), so a <code>.venv</code> created inside it
+    would be lost when the container exits.
+  </p>
 </div>
 
 <div class="step-box">

@@ -54,8 +54,36 @@ DOCKER_ARGS=(
     -w /workspace
 )
 
-if [ -d "$HOME/.kube" ]; then
-    DOCKER_ARGS+=(-v "$HOME/.kube:/root/.kube:ro")
+# Minikube kubeconfig often references cert/key files by absolute host paths
+# under $HOME/.minikube. This read-only mount lets kubectl inside the toolbox
+# load those credentials.
+MINIKUBE_MOUNT_ARGS=()
+if [ -d "$HOME/.minikube" ]; then
+    MINIKUBE_MOUNT_ARGS+=(-v "$HOME/.minikube:$HOME/.minikube:ro")
+fi
+
+# On macOS, Docker Desktop runs inside a VM so 127.0.0.1 inside the container
+# points to the VM's loopback, not the host macOS loopback. We work around this
+# by rewriting the kubeconfig to reach the minikube container directly over
+# Docker's internal network. The minikube TLS certificate includes "minikube"
+# in its SAN list, so connecting by container name passes verification.
+# On Linux we can simply use --network=host.
+if [[ "$(uname)" == "Darwin" ]]; then
+    if [ -f "$HOME/.kube/config" ]; then
+        TMP_KUBECONFIG="$(mktemp /tmp/devops-toolbox-kubeconfig.XXXXXX)"
+        # Rewrite 127.0.0.1:<host-port> -> minikube:8443 (container's
+        # internal API-server port).
+        sed 's/127\.0\.0\.1:[0-9]*/minikube:8443/g' "$HOME/.kube/config" > "$TMP_KUBECONFIG"
+        DOCKER_ARGS+=(-v "$TMP_KUBECONFIG:/root/.kube/config:ro")
+        DOCKER_ARGS+=("${MINIKUBE_MOUNT_ARGS[@]}")
+    fi
+else
+    # Linux: share the host network namespace so 127.0.0.1 works as-is.
+    DOCKER_ARGS+=(--network=host)
+    if [ -d "$HOME/.kube" ]; then
+        DOCKER_ARGS+=(-v "$HOME/.kube:/root/.kube:ro")
+    fi
+    DOCKER_ARGS+=("${MINIKUBE_MOUNT_ARGS[@]}")
 fi
 
 if [ "$DOCKER_SOCKET_ENABLED" -eq 1 ]; then
@@ -73,4 +101,18 @@ EOF
     DOCKER_ARGS+=(-v /var/run/docker.sock:/var/run/docker.sock)
 fi
 
-exec docker "${DOCKER_ARGS[@]}" "$IMAGE"
+# Start detached so we can attach extra networks before the user starts typing.
+DOCKER_ARGS+=(-d)
+CONTAINER_ID="$(docker "${DOCKER_ARGS[@]}" "$IMAGE")"
+
+# Connect to the minikube Docker network so "minikube:8443" resolves.
+if docker network inspect minikube >/dev/null 2>&1; then
+    docker network connect minikube "$CONTAINER_ID" >/dev/null 2>&1 || true
+fi
+
+# Attach interactively.
+docker attach "$CONTAINER_ID"
+
+if [[ -n "${TMP_KUBECONFIG:-}" ]]; then
+    rm -f "$TMP_KUBECONFIG"
+fi
