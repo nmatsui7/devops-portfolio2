@@ -6,5 +6,6 @@ rules:
     max-end: 1
   truthy:
     allowed-values: ['true', 'false', 'yes', 'no']
+    check-keys: false
   octal-values:
     forbid-implicit-octal: true
