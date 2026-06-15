@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ server_name }}</title>
+</head>
+<body>
+  <h1>{{ server_name }}</h1>
+  <p>Configured by Ansible on {{ ansible_date_time.iso8601 }}.</p>
+  <ul>
+    <li>OS: {{ ansible_distribution }} {{ ansible_distribution_version }}</li>
+    <li>Kernel: {{ ansible_kernel }}</li>
+    <li>Architecture: {{ ansible_architecture }}</li>
+    <li>Memory: {{ ansible_memtotal_mb }} MB</li>
+    <li>Processor: {{ ansible_processor[0] if ansible_processor is defined else "N/A" }}</li>
+  </ul>
+</body>
+</html>

@@ -25,11 +25,11 @@ jobs:
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
       - name: Build and push image (from solutions)
         run: |
-          docker build -t $IMAGE_NAME:${{ steps.tag.outputs.tag }} -f solutions/app/Dockerfile solutions/app/
-          docker tag $IMAGE_NAME:${{ steps.tag.outputs.tag }} $IMAGE_NAME:latest
+          docker build -t "$IMAGE_NAME:${{ steps.tag.outputs.tag }}" -f solutions/app/Dockerfile solutions/app/
+          docker tag "$IMAGE_NAME:${{ steps.tag.outputs.tag }}" "$IMAGE_NAME:latest"
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push $IMAGE_NAME:${{ steps.tag.outputs.tag }}
-          docker push $IMAGE_NAME:latest
+          docker push "$IMAGE_NAME:${{ steps.tag.outputs.tag }}"
+          docker push "$IMAGE_NAME:latest"
 
   deploy-staging:
     needs: [build]
@@ -67,7 +67,7 @@ jobs:
           echo "Rolled back staging deployment"
 
   deploy-production:
-    needs: [deploy-staging]
+    needs: [build, deploy-staging]
     runs-on: ubuntu-latest
     environment: production
     steps:

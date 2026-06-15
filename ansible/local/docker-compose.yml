@@ -1,0 +1,39 @@
+services:
+  web1:
+    image: ubuntu:24.04
+    container_name: ansible-web1
+    command: ["/lib/systemd/systemd"]
+    privileged: true
+    ports:
+      - "2201:22"
+    volumes:
+      - type: volume
+        source: ssh-keys
+        target: /root/.ssh
+
+  web2:
+    image: ubuntu:24.04
+    container_name: ansible-web2
+    command: ["/lib/systemd/systemd"]
+    privileged: true
+    ports:
+      - "2202:22"
+    volumes:
+      - type: volume
+        source: ssh-keys
+        target: /root/.ssh
+
+  web3:
+    image: ubuntu:24.04
+    container_name: ansible-web3
+    command: ["/lib/systemd/systemd"]
+    privileged: true
+    ports:
+      - "2203:22"
+    volumes:
+      - type: volume
+        source: ssh-keys
+        target: /root/.ssh
+
+volumes:
+  ssh-keys:

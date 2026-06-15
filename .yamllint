@@ -9,3 +9,8 @@ rules:
     check-keys: false
   octal-values:
     forbid-implicit-octal: true
+  braces:
+    max-spaces-inside: 1
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: false

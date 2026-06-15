@@ -1,0 +1,41 @@
+---
+- name: Configure nginx web servers
+  hosts: webservers
+  gather_facts: true
+
+  vars:
+    server_name: "{{ ansible_hostname }}"
+    nginx_port: 80
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Deploy index page from template
+      ansible.builtin.template:
+        src: index.html.j2
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: "0644"
+
+    - name: Ensure nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Print server info
+      ansible.builtin.debug:
+        msg: >
+          {{ inventory_hostname }} configured —
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }},
+          IP: {{ ansible_default_ipv4.address }},
+          Memory: {{ ansible_memtotal_mb }} MB
