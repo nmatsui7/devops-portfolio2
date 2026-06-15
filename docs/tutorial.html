@@ -262,6 +262,8 @@
   <tr><td>kubectl</td><td>1.29+</td><td>Kubernetes CLI</td></tr>
   <tr><td>helm</td><td>3.14+</td><td>Kubernetes package manager</td></tr>
   <tr><td>argocd</td><td>2.10+</td><td>GitOps CLI (optional)</td></tr>
+  <tr><td>trivy</td><td>0.50+</td><td>Container and filesystem vulnerability scanning</td></tr>
+  <tr><td>k6</td><td>0.49+</td><td>Load testing and API performance checks</td></tr>
   <tr><td>Python</td><td>3.12+</td><td>Flask API runtime</td></tr>
   <tr><td>curl</td><td>any</td><td>Smoke tests</td></tr>
 </table>
@@ -327,7 +329,7 @@ k6 version</code></pre>
 <div class="tip">
   <strong>Quick install by OS:</strong>
   <pre><code># macOS (Homebrew)
-brew install helm argocd python curl
+brew install helm argocd trivy k6 python curl
 
 # Ubuntu / Debian (apt)
 sudo apt update && sudo apt install -y helm curl python3 python3-pip
@@ -335,11 +337,36 @@ sudo apt update && sudo apt install -y helm curl python3 python3-pip
 curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 sudo install -m 555 argocd /usr/local/bin/argocd && rm argocd
 
-# Windows (winget)
-winget install Helm.Helm Python.Python.3.12 curl
-# ArgoCD CLI:
-curl -sSL -o argocd.exe https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe</code></pre>
+# Windows PowerShell (winget)
+winget install --id Helm.Helm -e
+winget install --id Python.Python.3.12 -e
+winget install --id Argo.argocd -e
+winget install --id AquaSecurity.Trivy -e
+winget install --id GrafanaLabs.k6 -e</code></pre>
 </div>
+
+<div class="info">
+  <strong>Windows recommendation:</strong> For the smoothest Volume 2 experience
+  on Windows, use Docker Desktop with WSL2 enabled, clone this repo inside your
+  WSL Ubuntu filesystem, and run the toolbox from WSL or Git Bash. The toolbox
+  gives you the same Linux terminal used in the examples while Docker Desktop,
+  Minikube, Kind, or the host still provides the actual container runtime and
+  Kubernetes cluster.
+</div>
+
+<p>From WSL or Git Bash on Windows, the toolbox flow is the same:</p>
+
+<pre><code>docker build -t devops-toolbox:volume2 -f docker/devops-toolbox.Dockerfile .
+./scripts/toolbox.sh</code></pre>
+
+<p>
+  If you prefer native PowerShell tools, install them with <code>winget</code>,
+  then close and reopen PowerShell before checking versions:
+</p>
+
+<pre><code>argocd version --client
+trivy --version
+k6 version</code></pre>
 
 <h3 id="workflow">Exercise Workflow</h3>
 

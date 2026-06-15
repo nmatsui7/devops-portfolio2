@@ -47,6 +47,29 @@ off by default. Use `./scripts/toolbox.sh --with-docker-socket` only if you
 understand that mounting `/var/run/docker.sock` lets the container control the
 host Docker daemon.
 
+If you prefer to install the missing Volume 2 tools directly on macOS with
+Homebrew, run:
+
+```bash
+brew install argocd trivy k6
+```
+
+On Windows, the recommended path is Docker Desktop with WSL2 enabled, then run
+the toolbox from WSL or Git Bash:
+
+```bash
+docker build -t devops-toolbox:volume2 -f docker/devops-toolbox.Dockerfile .
+./scripts/toolbox.sh
+```
+
+If you prefer native PowerShell tools, install the Volume 2 CLIs with `winget`:
+
+```powershell
+winget install --id Argo.argocd -e
+winget install --id AquaSecurity.Trivy -e
+winget install --id GrafanaLabs.k6 -e
+```
+
 ## Exercise Workflow
 
 This is a **write-code tutorial**. The Python files in `app/` start as stubs with `# TODO` markers. You fill in the implementation, then verify with tests.
