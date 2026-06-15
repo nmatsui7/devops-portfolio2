@@ -30,7 +30,7 @@ jobs:
       - name: Lint YAML files
         run: |
           pip install yamllint
-          yamllint .github docker infrastructure monitoring argocd ansible
+          yamllint .github docker infrastructure monitoring argocd
           yamllint \
             helm/portfolio-app/Chart.yaml \
             helm/portfolio-app/values.yaml \
