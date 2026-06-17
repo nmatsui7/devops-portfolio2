@@ -574,6 +574,85 @@ k6 version</code></pre>
   The static Nginx site from Volume 1 is replaced with a Python Flask API that connects to PostgreSQL. The app exposes a Todo list CRUD API plus health, readiness, metrics, and documentation endpoints.
 </p>
 
+<div class="info">
+  <strong>What is Flask?</strong>
+  Flask is a lightweight Python web framework. A "web framework" means it handles the boilerplate of receiving HTTP requests and sending HTTP responses so you can focus on your application logic. When you define a <strong>route</strong>, you are telling Flask: "when someone visits this URL, run this function."
+</div>
+
+<div class="info">
+  <strong>What is an API?</strong>
+  An Application Programming Interface (API) lets two programs talk to each other over HTTP. Your Flask API will:
+  <ul>
+    <li>Receive requests from a frontend, a mobile app, or <code>curl</code></li>
+    <li>Read or write data in a PostgreSQL database</li>
+    <li>Return JSON responses — a lightweight text format that any programming language can parse</li>
+  </ul>
+  The API follows the REST pattern, where each URL represents a resource (e.g. <code>/api/todos</code>) and the HTTP method says what to do with it.
+</div>
+
+<div class="info">
+  <strong>HTTP methods and CRUD:</strong>
+  CRUD stands for <strong>C</strong>reate, <strong>R</strong>ead, <strong>U</strong>pdate, <strong>D</strong>elete — the four operations every persistent storage system supports. A todo list is the simplest real-world example: you create a task, read it back, mark it complete (update), and remove it when done. Because it exercises all four operations with no complex business logic, it is the perfect "hello world" for a database-backed API. The HTTP methods map directly to CRUD:
+  <table>
+    <tr><th>HTTP Method</th><th>CRUD</th><th>What it does</th></tr>
+    <tr><td><code>GET</code></td><td>Read</td><td>Fetch one or many items</td></tr>
+    <tr><td><code>POST</code></td><td>Create</td><td>Add a new item</td></tr>
+    <tr><td><code>PUT</code> / <code>PATCH</code></td><td>Update</td><td>Modify an existing item</td></tr>
+    <tr><td><code>DELETE</code></td><td>Delete</td><td>Remove an item</td></tr>
+  </table>
+  Your todo API will support all four so the tests can verify every operation.
+</div>
+
+<div class="info">
+  <strong>How routes work:</strong>
+  A route is a URL pattern with an associated Python function. Example:
+  <pre><code>@app.route("/health")
+def health():
+    return {"status": "healthy"}, 200</code></pre>
+  <ul>
+    <li><code>@app.route("/health")</code> is a <strong>decorator</strong> — it registers this function to handle visits to <code>/health</code></li>
+    <li>The function returns a dictionary <code>{"status": "healthy"}</code> which Flask converts to a JSON response automatically</li>
+    <li>The <code>200</code> is the HTTP status code meaning "OK"</li>
+  </ul>
+  When a client sends <code>GET /health</code>, Flask runs this function and sends back <code>{"status": "healthy"}</code> with status 200.
+</div>
+
+<div class="info">
+  <strong>Why this matters for DevOps:</strong>
+  Volume 1 served static HTML files through Nginx. In Volume 2, the app is a dynamic API that:
+  <ul>
+    <li>Returns structured JSON instead of HTML pages</li>
+    <li>Persists data in PostgreSQL (a real database)</li>
+    <li>Exposes <code>/health</code> and <code>/ready</code> endpoints for Kubernetes liveness and readiness probes</li>
+    <li>Exposes <code>/metrics</code> for Prometheus to scrape</li>
+    <li>Runs behind Gunicorn (a production-grade WSGI server) inside a Docker container</li>
+  </ul>
+  Every one of these concepts — probing, metrics, containerization, database connections — is something you will manage in later chapters using Kubernetes, Helm, ArgoCD, and the monitoring stack.
+</div>
+
+<div class="info">
+  <strong>What data does the Todo API store?</strong>
+  Each todo item has four fields stored in a <code>todos</code> table in PostgreSQL:
+
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Example</th><th>Notes</th></tr>
+    <tr><td><code>id</code></td><td>Integer</td><td><code>1</code></td><td>Auto-increment primary key</td></tr>
+    <tr><td><code>title</code></td><td>String (200)</td><td><code>"Buy groceries"</code></td><td>Required — the task description</td></tr>
+    <tr><td><code>completed</code></td><td>Boolean</td><td><code>false</code></td><td>Defaults to <code>false</code> when created</td></tr>
+    <tr><td><code>created_at</code></td><td>Timestamp</td><td><code>"2026-06-09T12:00:00+00:00"</code></td><td>Set automatically on insert</td></tr>
+    <tr><td><code>updated_at</code></td><td>Timestamp</td><td><code>"2026-06-09T12:30:00+00:00"</code></td><td>Updated automatically on every change</td></tr>
+  </table>
+
+  A todo API response looks like this JSON:
+  <pre><code>{
+    "id": 1,
+    "title": "Buy groceries",
+    "completed": false,
+    "created_at": "2026-06-09T12:00:00+00:00",
+    "updated_at": "2026-06-09T12:00:00+00:00"
+  }</code></pre>
+</div>
+
 <p>
   You will write four files in <code>app/</code>. The tests in <code>app/tests/</code> define the contract. By the end of this chapter, <code>pytest app/tests/</code> should print green <code>PASSED</code> for every test.
 </p>

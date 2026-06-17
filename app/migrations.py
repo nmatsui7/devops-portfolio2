@@ -1,6 +1,2 @@
-from app import app
-from models import db
-
-with app.app_context():
-    db.create_all()
-    print("Tables created")
+# TODO: Import the app and db, then call db.create_all()
+# inside an app context to create all database tables.
